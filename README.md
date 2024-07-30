@@ -20,13 +20,13 @@ The Chris Sound Module is a Foundry VTT module designed to send and receive cust
 1. Ensure the module is activated in the Module Settings.
 2. Create a macro to use the `playSoundForPlayer` function. This function takes three arguments: playerName, playlistName, and songName.
 3. Example macro:
-   ....
+  
     const playerName = "Player6";  // Player's name
     const playlistName = "Ambient Sounds";  // Playlist name
     const songName = "Tor";  // Song name
 
     playSoundForPlayer(playerName, playlistName, songName);
-   ....
+
 5. Save the macro and add it to your hotbar.
 6. Execute the macro to play the sound for the specified player.
 
