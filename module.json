@@ -1,0 +1,20 @@
+{
+  "id": "chris-sound-module",
+  "title": "Chris Sound Module",
+  "description": "Ein Modul zum Senden und Empfangen von benutzerdefinierten Sound-Nachrichten.",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "12"
+  },
+  "esmodules": [
+    "scripts/socket-handler.js"
+  ],
+  "authors": [
+    {
+      "name": "Chrisrous",
+      "flags": {}
+    }
+  ],
+  "socket": true
+}
