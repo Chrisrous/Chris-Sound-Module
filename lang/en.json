@@ -1,0 +1,26 @@
+{
+  "CHRIS_SOUND_MODULE": {
+    "Setting": {
+      "EnableLoggingName": "Enable console logs",
+      "EnableLoggingHint": "Enables or disables console logs for the SoundPad.",
+      "OpenSoundPad": "Open SoundPad",
+      "SoundPadLabel": "SoundPad"
+    },
+    "UI": {
+      "SelectTargetPlayer": "Select target player:",
+      "DropAreaHint": "Drag sounds from a playlist here.",
+      "CurrentSound": "Current sound:",
+      "Volume": "Volume:",
+      "ClearSounds": "Remove all sounds"
+    },
+    "Messages": {
+      "SelectSoundFirst": "Please select a sound first.",
+      "SelectPlayerFirst": "Please select a player.",
+      "InvalidDropType": "Invalid type for drag-and-drop data:",
+      "DropDataError": "Error while processing drag-and-drop data:",
+      "PlaylistNotFound": "Playlist not found:",
+      "SoundNotFoundInPlaylist": "Sound not found in playlist:",
+      "GmOnly": "SoundPad is only available for GMs."
+    }
+  }
+}
