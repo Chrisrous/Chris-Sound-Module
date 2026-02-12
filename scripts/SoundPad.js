@@ -4,8 +4,8 @@ export let enableLogging = false; // Standardmäßig deaktiviert
 // Funktion zur Aktualisierung der Logging-Einstellungen
 Hooks.once("init", () => {
   game.settings.register("chris-sound-module", "enableLogging", {
-    name: "Konsolen-Logs aktivieren",
-    hint: "Aktiviert oder deaktiviert Konsolen-Logs für das SoundPad.",
+    name: game.i18n.localize("CHRIS_SOUND_MODULE.Setting.EnableLoggingName"),
+    hint: game.i18n.localize("CHRIS_SOUND_MODULE.Setting.EnableLoggingHint"),
     scope: "client", // Nur für den aktuellen Client
     config: true,
     default: false, // Standardmäßig deaktiviert
@@ -72,14 +72,14 @@ class SoundPad extends FormApplication {
       $(button).addClass("active");
 
       // Aktualisiere die Anzeige für den aktuell ausgewählten Sound
-      html.find(".selected-sound-display").text(`Aktueller Sound: ${this.selectedSoundName}`);
+      html.find(".selected-sound-display").text(this.selectedSoundName);
     });
 
     // Play-Button
     html.find(".play-button").click(() => {
       // Klick auf den Play-Button spielt den aktuell ausgewählten Sound für den ausgewählten Spieler ab.
       if (!this.selectedSoundId || !this.sounds[this.selectedSoundId]) {
-        console.error("Bitte zuerst einen Sound auswählen.");
+        console.error(game.i18n.localize("CHRIS_SOUND_MODULE.Messages.SelectSoundFirst"));
         return;
       }
 
@@ -88,7 +88,7 @@ class SoundPad extends FormApplication {
 
       const playerName = playerSelect.val();
       if (!playerName) {
-        console.warn("Bitte einen Spieler auswählen.");
+        console.warn(game.i18n.localize("CHRIS_SOUND_MODULE.Messages.SelectPlayerFirst"));
         return;
       }
 
@@ -101,7 +101,7 @@ class SoundPad extends FormApplication {
       const playerName = playerSelect.val();
 
       if (!playerName) {
-        console.warn("Bitte einen Spieler auswählen.");
+        console.warn(game.i18n.localize("CHRIS_SOUND_MODULE.Messages.SelectPlayerFirst"));
         return;
       }
 
@@ -116,7 +116,7 @@ class SoundPad extends FormApplication {
       const playerName = playerSelect.val();
 
       if (!playerName) {
-        console.warn("Bitte einen Spieler auswählen.");
+        console.warn(game.i18n.localize("CHRIS_SOUND_MODULE.Messages.SelectPlayerFirst"));
         return;
       }
 
@@ -162,7 +162,7 @@ class SoundPad extends FormApplication {
       data = JSON.parse(event.dataTransfer.getData("text/plain"));
       logMessage("Daten aus Drag-and-Drop-Event:", data); // Debugging-Ausgabe
     } catch (err) {
-      console.error("Fehler beim Verarbeiten der Drag-and-Drop-Daten:", err);
+      console.error(game.i18n.localize("CHRIS_SOUND_MODULE.Messages.DropDataError"), err);
       return;
     }
 
@@ -173,13 +173,13 @@ class SoundPad extends FormApplication {
 
       const playlist = game.playlists.get(playlistId);
       if (!playlist) {
-        console.error("Playlist nicht gefunden:", playlistId);
+        console.error(game.i18n.localize("CHRIS_SOUND_MODULE.Messages.PlaylistNotFound"), playlistId);
         return;
       }
 
       const sound = playlist.sounds.get(soundId);
       if (!sound) {
-        console.error("Sound nicht gefunden in Playlist:", soundId);
+        console.error(game.i18n.localize("CHRIS_SOUND_MODULE.Messages.SoundNotFoundInPlaylist"), soundId);
         return;
       }
 
@@ -197,20 +197,20 @@ class SoundPad extends FormApplication {
       logMessage(`Sound "${sound.name}" hinzugefügt:`, sound);
       this.render(true);
     } else {
-      console.warn("Ungültiger Typ für Drag-and-Drop-Daten:", data.type);
+      console.warn(game.i18n.localize("CHRIS_SOUND_MODULE.Messages.InvalidDropType"), data.type);
     }
   }
 }
 
 Hooks.once("ready", () => {
   if (!game.user.isGM) {
-    console.warn("SoundPad ist nur für GMs verfügbar.");
+    console.warn(game.i18n.localize("CHRIS_SOUND_MODULE.Messages.GmOnly"));
     return;
   }
 
   game.settings.registerMenu("chris-sound-module", "soundpad", {
-    name: "SoundPad öffnen",
-    label: "SoundPad",
+    name: game.i18n.localize("CHRIS_SOUND_MODULE.Setting.OpenSoundPad"),
+    label: game.i18n.localize("CHRIS_SOUND_MODULE.Setting.SoundPadLabel"),
     icon: "fas fa-music",
     type: SoundPad,
     restricted: true, // Nur GMs können das SoundPad öffnen

@@ -1,7 +1,7 @@
 <form class="chris-sound-soundpad">
   <!-- Spieler-Auswahl -->
   <div class="form-group">
-    <label for="player-select">Zielspieler auswählen:</label>
+    <label for="player-select">{{localize "CHRIS_SOUND_MODULE.UI.SelectTargetPlayer"}}</label>
     <select id="player-select" class="player-select form-control">
       {{#each users}}
       <option value="{{this.name}}">{{this.name}}</option>
@@ -11,7 +11,7 @@
 
   <!-- Drop-Bereich für Sounds -->
   <div class="soundpad-drop-area">
-    Ziehen Sie Sounds aus einer Wiedergabeliste hierher.
+    {{localize "CHRIS_SOUND_MODULE.UI.DropAreaHint"}}
   </div>
 
   <!-- Liste der Sounds -->
@@ -25,7 +25,8 @@
 
   <!-- Anzeige des aktuell ausgewählten Sounds -->
   <div class="selected-sound-info">
-    <span class="selected-sound-display">Aktueller Sound: {{selectedSoundName}}</span>
+    <span>{{localize "CHRIS_SOUND_MODULE.UI.CurrentSound"}}</span>
+    <span class="selected-sound-display">{{selectedSoundName}}</span>
   </div>
 
   <!-- Medien-Steuerung -->
@@ -36,10 +37,10 @@
 
   <!-- Lautstärkeregler -->
   <div class="volume-control">
-    <label for="volume-slider">Lautstärke:</label>
+    <label for="volume-slider">{{localize "CHRIS_SOUND_MODULE.UI.Volume"}}</label>
     <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.8" />
   </div>
 
   <!-- Button: Alle Sounds entfernen -->
-  <button type="button" class="clear-sounds">Alle Sounds entfernen</button>
+  <button type="button" class="clear-sounds">{{localize "CHRIS_SOUND_MODULE.UI.ClearSounds"}}</button>
 </form>

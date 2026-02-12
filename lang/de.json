@@ -1,0 +1,26 @@
+{
+  "CHRIS_SOUND_MODULE": {
+    "Setting": {
+      "EnableLoggingName": "Konsolen-Logs aktivieren",
+      "EnableLoggingHint": "Aktiviert oder deaktiviert Konsolen-Logs für das SoundPad.",
+      "OpenSoundPad": "SoundPad öffnen",
+      "SoundPadLabel": "SoundPad"
+    },
+    "UI": {
+      "SelectTargetPlayer": "Zielspieler auswählen:",
+      "DropAreaHint": "Ziehen Sie Sounds aus einer Wiedergabeliste hierher.",
+      "CurrentSound": "Aktueller Sound:",
+      "Volume": "Lautstärke:",
+      "ClearSounds": "Alle Sounds entfernen"
+    },
+    "Messages": {
+      "SelectSoundFirst": "Bitte zuerst einen Sound auswählen.",
+      "SelectPlayerFirst": "Bitte einen Spieler auswählen.",
+      "InvalidDropType": "Ungültiger Typ für Drag-and-Drop-Daten:",
+      "DropDataError": "Fehler beim Verarbeiten der Drag-and-Drop-Daten:",
+      "PlaylistNotFound": "Playlist nicht gefunden:",
+      "SoundNotFoundInPlaylist": "Sound nicht gefunden in Playlist:",
+      "GmOnly": "SoundPad ist nur für GMs verfügbar."
+    }
+  }
+}
