@@ -1,7 +1,7 @@
-// Erweiterung des Socket-Handlers mit neuen Funktionen
+// Socket message handling for remote sound playback, stopping, and volume control.
 
 // Importiert die Logging-Konfiguration aus dem SoundPad-Modul
-import { enableLogging } from './soundpad.js'; // Pfad anpassen
+import { enableLogging } from './SoundPad.js'; // Pfad anpassen
 
 // Hilfsfunktion für konsolenbasiertes Logging
 function logMessage(message, ...optionalParams) {
