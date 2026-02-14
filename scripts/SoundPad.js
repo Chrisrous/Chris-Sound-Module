@@ -1,4 +1,4 @@
-// Erweiterung des SoundPad zur Unterstützung von Play, Stop und Lautstärke
+// SoundPad UI and drag-and-drop logic for targeting playlist sounds to specific players.
 export let enableLogging = false; // Standardmäßig deaktiviert
 
 // Funktion zur Aktualisierung der Logging-Einstellungen
