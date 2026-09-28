@@ -2,15 +2,35 @@
   "id": "chris-sound-module",
   "title": "Chris Sound Module",
   "description": "Ein SoundPad für gezielte Sound-Wiedergabe an einzelne Spieler. Foundry v14 Release Candidate; Live-Abnahme ausstehend.",
-  "version": "2.0.0-rc.1",
-  "compatibility": { "minimum": "14", "maximum": "14" },
-  "esmodules": ["scripts/main.js"],
-  "styles": ["css/soundpad.css"],
-  "languages": [
-    { "lang": "de", "name": "Deutsch", "path": "lang/de.json" },
-    { "lang": "en", "name": "English", "path": "lang/en.json" }
+  "version": "2.0.0-rc.2",
+  "compatibility": {
+    "minimum": "14",
+    "maximum": "14"
+  },
+  "esmodules": [
+    "scripts/main.js"
   ],
-  "authors": [{ "name": "Chrisrous", "flags": {} }],
+  "styles": [
+    "css/soundpad.css"
+  ],
+  "languages": [
+    {
+      "lang": "de",
+      "name": "Deutsch",
+      "path": "lang/de.json"
+    },
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "authors": [
+    {
+      "name": "Chrisrous",
+      "flags": {}
+    }
+  ],
   "socket": true,
   "url": "https://github.com/Chrisrous/Chris-Sound-Module"
 }

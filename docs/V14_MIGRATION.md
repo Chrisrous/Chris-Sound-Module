@@ -1,120 +1,134 @@
-# Foundry v14 migration and validation record
+# Foundry v14 migration and core expansion
 
-Date: 2026-09-28. Candidate: `2.0.0-rc.1`.
-Baseline: `Chrisrous/Chris-Sound-Module` main commit `ecb6e01161409ddcdb19fff8d494ec10242722e7`.
-Public API reviewed: Foundry VTT **14.368 Stable**.
+Date: 2026-09-29. Candidate: **2.0.0-rc.2**.
+Baseline: `feature/foundry-v14`, RC1 commit `a44c0604b7807bee68a4e040a7b8502b7e9224cd`.
+The original 36-test RC1 migration record is retained in [the historical archive](RC1_MIGRATION_ARCHIVE.md).
+Statements there about missing persistence, feedback and groups describe RC1 only.
 
-## Scope and migration decisions
+## Implemented scope
 
-- Replace FormApplication/getData/activateListeners with ApplicationV2,
-  HandlebarsApplicationMixin, DEFAULT_OPTIONS, PARTS, _prepareContext and async _onRender.
-  Use native DOM listeners and data-action handlers; no jQuery requirement.
-- Register the restricted settings submenu in init. All clients register the receiver at ready.
-  One entry module imports exact-case paths; the old `./soundpad.js` import did not match `SoundPad.js`.
-- Replace HTMLAudioElement with `game.audio.create`, dedicated music/environment/interface
-  contexts, audio unlock, Sound.load/play/stop and Sound.fade. Sound.volume is read-only;
-  zero-duration fade is the public volume-update path. Use documented playback `onended`.
-- Map PlaylistSound.repeat to Sound's loop option (the old code read `sound.loop`).
-  Resolve PlaylistSound UUIDs through foundry.utils.fromUuid rather than splitting UUID strings.
-- Target the User ID. Retain old name-based macro signatures, but reject ambiguous names.
-  Resolve the current document on every Play, so renames and changed audio paths are respected.
-- Manage one module-owned sound per receiving browser with cancellation generations. Stop
-  cancels deferred playback before unlock/load completes. A newer Play supersedes older work.
-  Keep a volume change received while the sound is loading or starting. Never stop ordinary playlists.
-- Preserve pad state within the browser session, deduplicate dropped UUIDs, retain target/volume
-  across renders, reset selected sound when clearing, localize control text/errors and scope styling.
-- No additional runtime dependencies, persistence migration, world document writes, external
-  telemetry, automatic release publication, or changes to the original stable release.
+| Approved feature | Implementation |
+| --- | --- |
+| Persistent named pads | Hidden `scope: user` setting, versioned validated data, queued writes, stale-revision checks |
+| Playback feedback | Request/session IDs, per-client status sequences, 10-second no-response indicator, independent group outcomes |
+| Optional fades | Per-entry 0 to 30000 ms, Foundry `Sound.play({fade})` and `Sound.stop({fade})`, sequential transitions |
+| Saved target groups | Named groups of stable User IDs; deduplication and individual offline/failure reporting |
+| GM preview | Separate local SoundPlayback instance; dedicated Stop; closing pad stops preview only |
+| Sound management | Search, category filtering, favorite toggles, aliases, individual removal, manual up/down ordering |
+| Emergency stop | All active recipients, incoming audio, local previews and pending requests; bypasses fade-out |
+| Sound presets | Volume, repeat inherit/override, fade-in and fade-out without editing source playlists |
+| Player audio preferences | User-scoped factor and mute, applied at start and on subsequent volume/preference changes |
 
-## Validation status
+Deferred: export/import, extra quick-access buttons/keybindings, multiple simultaneous incoming
+tracks, scene automation and sample-accurate group synchronization. Existing opening macros remain.
 
-**Implemented and locally tested, not runtime-certified in Foundry.**
+## Architecture and compatibility
 
-Local tools: Node.js 22.16.0, Python 3, Linux filesystem (case-sensitive).
-`npm test`: 36 automated tests passing against deliberately small API/DOM doubles.
-`npm run check`: runtime JavaScript syntax, exact-case relative imports, referenced manifest
-assets, locale key parity/completeness and basic Handlebars block balance.
-`python3 tools/package.py`: deterministic ZIP build, integrity check, packaged manifest match,
-SHA-256 checksum. These are not a complete Handlebars compiler or Foundry integration tests.
+- `audio.js`: owns created Sound instances, including fading instances until stopped. Cancellable
+  waits prevent obsolete work from starting after unlock/load. A late native start is stopped too.
+  A 60-second start limit prevents very old sounds from starting after audio finally becomes usable.
+- `library.js`: validated version-1 library. Default pads are created on first GM use. Invalid or
+  newer data is rejected without reset. User-scoped settings isolate different GM accounts/worlds.
+  No original playlist or audio-file writes. There is no RC1 disk migration because RC1 did not persist pads.
+- `status.js`: bounded session-local diagnostics (200 requests, at most 16 responding clients per
+  request). Request/recipient/session binding and monotonic status sequences reject stale replies.
+  Multiple tabs are not falsely represented as exactly-once playback. A volume acknowledgement does
+  not hide the original playback's subsequent completion. Status text is inserted via textContent.
+- `socket-handler.js`: protocol 2, stable IDs, best-effort claimed-GM validation, duplicate and sequence
+  rejection, volatile delivery, cancellation of still-resolving outgoing Play intents, per-recipient
+  group outcomes and preserved legacy macro wrappers. All clients must reload when upgrading RC1.
+- `SoundPad.js`: ApplicationV2/Handlebars parts and delegated native events. Preset drafts survive
+  unrelated renders; save applies them. Volume is perceptually converted and sent once on change.
+- `main.js`: init registration, ready receiver/API setup, userConnected updates and personal preferences.
 
-Test coverage includes invalid/misaddressed messages, best-effort claimed-sender filtering,
-read-only audio volume, repeat/channel mapping, independent module playback, self-targeting,
-rapid replacement, stop before audio unlock, stop during load/play, volume during unlock/load/play,
-failed or superseded load completion, natural end, duplicate names, offline/disconnected targets,
-permission rechecks, legacy macros, init/ready wiring, pad selection/drop state and native input/change events.
+The public v14 documentation was consulted for user-scoped settings, ApplicationV2, DialogV2,
+Sound playback/fades, audio unlock and volume conversion, and userConnected. Retrieved public
+pages identify v14.368, with one AudioHelper response identifying v14.365. This is an API review,
+not execution against either installed Foundry build.
 
-**Not executed:** actual v14 launch, real Handlebars rendering, drag payloads from the real playlist
-sidebar, AudioContext/channel behavior, browser autoplay, real Socket.IO relay, two-client playback,
-multiple tabs for one user, hot reload, or interactions with third-party modules/game systems.
-No compatibility `verified` flag is set. CI execution status is separate from local test results.
+## Trust, transport and operational boundaries
 
-## Socket trust boundary
+This remains a raw module socket. Packets can be inspected by other connected clients, and the
+payload's sender ID is not server-authenticated. Neither role checks nor request IDs make it a
+hostile-client-resistant protocol. Acknowledgements are client reports and can also be forged.
+Started does not imply that the player's operating system, hardware or Foundry channel is audible.
+Personal preferences apply to cooperative module clients, not an adversarially modified client.
 
-The module uses Foundry's built-in `module.chris-sound-module` socket with `socket: true`.
-The server relays module messages to other clients; receiver code filters by User ID before
-creating audio. This controls which unmodified client plays a sound, **not who can inspect the packet**.
-Audio URLs and packet metadata are not secret or encrypted by this module.
+Volatile messages are deliberately not buffered or replayed across reconnect. They can be dropped
+when transport is unavailable; missing acknowledgements must not be presented as success. No
+automatic retry occurs. Emergency stop reaches connected cooperative clients only. A failed local
+stop does not prevent sending emergency commands to other recipients. Clock-based packet expiry
+allows a bounded age/future window and assumes reasonably aligned device clocks (expiry at send
+plus 120 seconds, accepted up to 180 seconds ahead). Test with real machines before release.
 
-The sender ID in the payload is client-supplied. Checking that it refers to an active GM is
-useful defensive validation but is **not authentication or authorization enforced by the server**.
-A malicious connected client can forge it. Do not claim this closes that trust boundary.
-If hostile-client resistance is required, a separately designed authenticated server-supported
-transport is needed; swapping to another client-only wrapper must not be assumed to solve it.
+Same-account, different-window edits use best-effort revision detection, not an atomic server
+compare-and-swap. Different GM accounts have separate data. Do not edit one GM library concurrently
+in multiple windows. User settings/world backups are not confidential storage for GM secrets.
 
-## Live smoke-test checklist
+## Automated validation
 
-Use a backup/test world on v14.368, a GM browser and a separate player browser; ideally add
-a second player to confirm they do not hear audio intended for the first. All run the same RC.
-Record exact Foundry build, game system version, browsers and enabled modules with the result.
+Local environment: Node.js 22.16.0, Python 3, case-sensitive Linux filesystem.
+Local result: **83/83 tests pass**, including 9 simulated multi-client transport tests.
+Static checks pass for 7 runtime modules and 97 EN/DE localization keys.
+The expanded tests replace and extend the RC1 behavioral suite for protocol 2 and persistent UI.
+They cover malformed packets, source validation, permissions, repeat/fade options, personal limits,
+independent preview, cancellation during UUID resolution/unlock/load/native start/fade-out,
+request expiry and duplicates, status ordering/timeouts/multiple tabs, user/world persistence,
+write failure and conflicts, library validation, UI operations, native slider events and legacy macros.
+An additional in-process relay suite exercises GM and separate player service instances, per-target
+acknowledgements, a missing module receiver, unlock cancellation, personal mute, global stop,
+repeated packets and two tabs for one user.
 
-- [ ] Install without a double-nested module folder; see version 2.0.0-rc.1; no missing-import error.
-- [ ] Open from settings and a macro, close/reopen, resize and change EN/DE language/theme.
-      One pad instance retains its session entries, selection, target and slider value.
-- [ ] Drop a real playlist sound, select it, repeat the drop (no duplicate). Try an invalid drop.
-- [ ] Play for player A: A hears it, player B and GM do not. Self-target GM: GM hears it once.
-      Normal world playlists continue unaffected. Multiple tabs of one user may each receive it.
-- [ ] Test non-looping and repeating sounds; verify playlist music/environment/interface channels
-      and receiving-client channel controls. Slider 0 must mute; 1 must not exceed channel limits.
-- [ ] Play repeatedly; only the latest module sound remains. Stop silences it. Change volume
-      during slow loading. Stop immediately after Play; no later restart when loading completes.
-- [ ] Repeat before the receiving browser's first audio gesture. A stopped pending sound must
-      not start on the first click. A still-current pending sound may then start normally.
-- [ ] Rename a sound/playlist and change the asset path: UUID-based playback still finds it.
-      Delete the sound: localized error, no crash or stale source replay. Test duplicate names in macros.
-- [ ] Try offline users, lost network, missing files and browser audio failures. No unhandled
-      rejection. Note that the GM currently receives no remote playback acknowledgement.
-- [ ] Run all three legacy macros and preferred ID-based API calls. Non-GM control is refused
-      in ordinary use; do not treat the sender ID checks as protection against packet forgery.
-- [ ] Remove pad entries: selected entry clears, but existing playback continues until Stop.
-      Reloading the browser clears pad entries (persistence is not in this release).
-- [ ] Inspect both clients' consoles for runtime errors/deprecation warnings throughout.
+Run `npm run check`, `npm test` and `python3 tools/package.py`. A generated test transcript records
+actual results; CI results must be checked separately. Tests use doubles. Static template block,
+localization and action checks are not a Handlebars compiler or an actual browser render.
+
+## Required live checklist before publishing
+
+Record exact Foundry build, game system, browsers, enabled modules and results. Use a backed-up
+v14 test world, a GM browser and at least two player browsers, all on RC2.
+
+- [ ] Install, init/ready, module settings and English/German UI load without console errors.
+- [ ] Open, resize, close/reopen and change themes. Confirm the list and controls remain usable.
+- [ ] Create/rename/delete pads; drop actual playlist sounds; duplicates stay single; search,
+      categories, favorites and ordering work. Source playlists and audio files remain untouched.
+- [ ] Save preset aliases/category/repeat/fades. Edit options, move the volume slider or select
+      targets before saving: unsaved option drafts must not silently disappear.
+- [ ] Reload Foundry/browser and use another browser with the same GM/world: saved pads/groups
+      persist. Different GM accounts/worlds remain separate. Test write failure and stale editing.
+- [ ] Create/update/delete target groups, including offline/deleted users. Other available members
+      still receive audio and each has an honest status. No old command plays when users reconnect.
+- [ ] Preview only on GM, while an incoming/self-targeted module sound is already playing.
+      Stop preview and close pad without interrupting that incoming sound. Remove the selected
+      entry while preview plays and check the dedicated preview Stop remains available.
+- [ ] Individual playback: selected player hears audio, unselected player and GM do not. Check
+      live loading/started/ended/error reports, absent receiver timeouts and both tabs of one user.
+- [ ] Browser audio initially locked, slow/missing files, repeat on/off, each Foundry audio channel.
+      Stop while locked/loading/starting. Wait then unlock: cancelled sounds must remain cancelled.
+- [ ] Test personal factor and mute before Play, during slow loading, during fade-in/out and after
+      GM volume changes. Verify ordinary playlists and channel controls remain unaffected.
+- [ ] Test sequential fades and rapid replacement. Emergency stop during active fade, preview,
+      queued/native start and slow UUID resolution must prevent obsolete playback returning.
+- [ ] Disconnect/reconnect GM and players. No automatic replay. Unreachable recipients must not
+      be reported as confirmed stopped. Test aligned and deliberately skewed device clocks.
+- [ ] Existing name-based macros and new ID/group/preview/panic APIs work. Inspect consoles for
+      deprecations, rejected promises and conflicts with other enabled modules.
 
 ## Release gate
 
-Keep the candidate on its feature branch until the live checklist is recorded as passing.
-Only then promote the code, choose a stable version and synchronize module.json/package.json,
-set compatibility.verified to the actually tested Foundry build, and restore the intended stable
-manifest URL plus a download URL for a real release asset. Verify the download itself, its archive
-layout and the included manifest before advertising the stable installation/update link.
-Do not point main's public manifest at the old v1.1.0 ZIP or publish a nonexistent future asset URL.
+Keep PR #6 as draft until live results are recorded. Do not claim `compatibility.verified` or publish
+this RC to the stable update channel. After successful live checks, choose a stable version,
+synchronize package/manifest versions, set verification to the tested build, and use real released
+manifest/ZIP asset URLs. Validate the downloaded archive layout and included manifest.
 
-## Optional follow-up improvements (not included)
+## Primary references
 
-1. Persist named sound pads per GM/world, with search, categories and individual removal.
-2. Return playback success/failure acknowledgements to the GM, with request IDs and timeouts.
-3. Add optional fade-in/fade-out and saved target groups, with explicit rules for overlapping audio.
-
-## Primary API references
-
-Reviewed on 2026-09-28; documentation can change after this review.
-
-- ApplicationV2: https://foundryvtt.com/api/classes/foundry.applications.api.ApplicationV2.html
-- HandlebarsApplicationMixin: https://foundryvtt.com/api/functions/foundry.applications.api.HandlebarsApplicationMixin.html
-- Settings submenu: https://foundryvtt.com/api/interfaces/foundry.types.SettingSubmenuConfig.html
-- AudioHelper: https://foundryvtt.com/api/classes/foundry.audio.AudioHelper.html
-- Sound: https://foundryvtt.com/api/classes/foundry.audio.Sound.html
-- Sound creation: https://foundryvtt.com/api/interfaces/foundry.audio.SoundCreationOptions.html
-- Sound playback: https://foundryvtt.com/api/interfaces/foundry.audio.SoundPlaybackOptions.html
-- PlaylistSound data: https://foundryvtt.com/api/interfaces/foundry.documents.types.PlaylistSoundData.html
-- UUID lookup: https://foundryvtt.com/api/functions/foundry.utils.fromUuid.html
-- Module manifest and socket relay: https://foundryvtt.com/article/module-development/
+- https://foundryvtt.com/api/classes/foundry.applications.api.ApplicationV2.html
+- https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html
+- https://foundryvtt.com/api/interfaces/foundry.types.SettingConfig.html
+- https://foundryvtt.com/api/classes/foundry.audio.AudioHelper.html
+- https://foundryvtt.com/api/classes/foundry.audio.Sound.html
+- https://foundryvtt.com/api/interfaces/foundry.audio.SoundPlaybackOptions.html
+- https://foundryvtt.com/api/functions/hookEvents.userConnected.html
+- https://foundryvtt.com/article/module-development/
+- https://socket.io/docs/v4/client-offline-behavior/

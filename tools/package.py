@@ -21,7 +21,6 @@ def main() -> None:
             raise FileNotFoundError(f"Missing package asset: {path}")
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(files):
-            # Stable timestamps make identical inputs produce an identical artifact.
             info = zipfile.ZipInfo(f"{manifest['id']}/{path.relative_to(root).as_posix()}", (2026, 9, 28, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o100644 << 16
@@ -29,8 +28,7 @@ def main() -> None:
     with zipfile.ZipFile(output) as archive:
         if archive.testzip() is not None:
             raise RuntimeError("ZIP integrity check failed")
-        packed = json.loads(archive.read(f"{manifest['id']}/module.json"))
-        if packed != manifest:
+        if json.loads(archive.read(f"{manifest['id']}/module.json")) != manifest:
             raise RuntimeError("Packaged manifest does not match source")
     checksum = sha256(output.read_bytes()).hexdigest()
     output.with_suffix(output.suffix + ".sha256").write_text(f"{checksum}  {output.name}\n", encoding="utf-8")

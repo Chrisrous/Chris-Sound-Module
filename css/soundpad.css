@@ -1,16 +1,21 @@
-/* Scoped to the v14 application; inherit Foundry's light/dark theme. */
-.chris-sound-module .window-content { overflow-y: auto; }
-.chris-sound-soundpad { display: flex; flex-direction: column; gap: 12px; padding: 12px; min-width: 0; }
-.chris-sound-soundpad .form-group { display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
-.chris-sound-soundpad .soundpad-drop-area { border: 2px dashed currentColor; border-radius: 8px; padding: 14px; text-align: center; opacity: .8; }
-.chris-sound-soundpad .sound-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
-.chris-sound-soundpad .sound-button { display: flex; flex-direction: column; height: auto; padding: 8px; white-space: normal; overflow-wrap: anywhere; line-height: 1.4; }
-.chris-sound-soundpad .sound-button small { opacity: .7; font-size: .8em; }
-.chris-sound-soundpad .sound-button.active { outline: 2px solid var(--color-warm-1, #cf9356); outline-offset: 1px; }
-.chris-sound-soundpad .selected-sound-info { display: flex; flex-wrap: wrap; gap: 6px; overflow-wrap: anywhere; }
-.chris-sound-soundpad .media-controls { display: flex; gap: 8px; }
-.chris-sound-soundpad .media-controls button { flex: 1; }
-.chris-sound-soundpad .volume-control { display: flex; flex-direction: column; gap: 6px; }
-.chris-sound-soundpad .volume-slider { width: 100%; }
-.chris-sound-soundpad .volume-value { float: right; }
-.chris-sound-soundpad button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.chris-sound-module .window-content { overflow: auto; }
+.chris-sound-soundpad { display: flex; flex-direction: column; gap: 0.65rem; padding: 0.4rem; min-width: 0; }
+.chris-sound-soundpad fieldset { border: 1px solid var(--color-border-light-2, #777); border-radius: 0.4rem; padding: 0.6rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.chris-sound-soundpad legend { padding: 0 0.4rem; font-weight: bold; }
+.chris-sound-soundpad .csm-row { display: flex; flex-wrap: wrap; align-items: end; gap: 0.4rem; }
+.chris-sound-soundpad .csm-row > label, .chris-sound-soundpad .csm-row > button { flex: 1 1 120px; min-width: 0; }
+.chris-sound-soundpad label { display: flex; flex-direction: column; gap: 0.2rem; }
+.chris-sound-soundpad .csm-check { flex-direction: row; align-items: center; }
+.chris-sound-soundpad .soundpad-drop-area { border: 2px dashed var(--color-border-light-2, #777); border-radius: 0.4rem; padding: 0.8rem; text-align: center; }
+.chris-sound-soundpad .sound-list { max-height: 230px; min-height: 60px; overflow: auto; display: flex; flex-direction: column; gap: 0.3rem; }
+.chris-sound-soundpad .sound-row { display: flex; gap: 0.2rem; align-items: center; }
+.chris-sound-soundpad [hidden] { display: none !important; }
+.chris-sound-soundpad .sound-row > button { width: 2rem; flex: 0 0 auto; padding: 0.2rem; }
+.chris-sound-soundpad .sound-row .sound-button { flex: 1; min-width: 0; width: auto; text-align: left; white-space: normal; overflow-wrap: anywhere; padding: 0.4rem; }
+.chris-sound-soundpad .sound-button small { display: block; font-weight: normal; opacity: 0.75; }
+.chris-sound-soundpad .sound-button.active { outline: 2px solid var(--color-border-highlight, #a86); outline-offset: -2px; }
+.chris-sound-soundpad .recipient-list { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; }
+.chris-sound-soundpad .recipient-status { display: flex; flex-direction: column; gap: 0.25rem; overflow-wrap: anywhere; }
+.chris-sound-soundpad .csm-hint { font-size: 0.85em; opacity: 0.8; margin: 0; }
+.chris-sound-soundpad .csm-panic { border: 2px solid var(--color-level-error, #c44); font-weight: bold; min-height: 2.4rem; }
+.chris-sound-soundpad button:focus-visible, .chris-sound-soundpad input:focus-visible, .chris-sound-soundpad select:focus-visible { outline: 2px solid var(--color-border-highlight, #a86); outline-offset: 1px; }
