@@ -1,151 +1,16 @@
-/* SoundPad Grunddesign */
-.chris-sound-soundpad {
-  padding: 20px;
-  font-family: 'Uncial Antiqua', serif;
-  max-width: 400px;
-  margin: auto;
-  color: #3c2f1a;
-}
-
-/* Label-Styling */
-.chris-sound-soundpad label {
-  font-size: 16px;
-  display: block;
-  margin-bottom: 5px;
-  color: #6b4b1a;
-  font-weight: bold;
-}
-
-/* Drop-Bereich für Sounds */
-.chris-sound-soundpad .soundpad-drop-area {
-  border: 3px dashed #6b4b1a;
-  border-radius: 10px;
-  padding: 10px;
-  text-align: center;
-  margin: 10px 0;
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  font-style: italic;
-}
-
-/* Sound-Button Styling */
-.chris-sound-soundpad .sound-button {
-  background: linear-gradient(135deg, #8c5c3f, #a46a50);
-  color: white;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  margin: 5px;
-  font-size: 16px;
-  font-family: 'Uncial Antiqua', serif;
-  transition: transform 0.2s, background 0.3s;
-  position: relative;
-  overflow: hidden;
-}
-
-.chris-sound-soundpad .sound-button:hover {
-  transform: scale(1.05);
-  background: linear-gradient(135deg, #e6b89c, #a46a50);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-}
-
-/* Partikel-Animation bei Klick */
-.chris-sound-soundpad .sound-button:active::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 150px;
-  height: 150px;
-  background: radial-gradient(circle, rgba(255, 255, 0, 0.5), rgba(255, 255, 0, 0));
-  border-radius: 50%;
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.5);
-  animation: particleEffect 0.6s ease-out;
-}
-
-@keyframes particleEffect {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(0.5);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(2);
-  }
-}
-
-/* Medien-Steuerung Buttons */
-.chris-sound-soundpad .media-controls button {
-  background: linear-gradient(135deg, #8c5c3f, #6b4b1a);
-  color: white;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  margin: 5px;
-  font-size: 16px;
-  font-family: 'Uncial Antiqua', serif;
-  transition: all 0.3s ease;
-}
-
-.chris-sound-soundpad .media-controls button:hover {
-  background: linear-gradient(135deg, #a46a50, #e6b89c);
-  color: black;
-  text-shadow: 1px 1px 5px rgba(255, 255, 255, 0.8);
-}
-
-/* Lautstärkeregler - Magischer Stil */
-.chris-sound-soundpad .volume-control {
-  margin: 15px 0;
-}
-
-.chris-sound-soundpad #volume-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 8px;
-  background: linear-gradient(90deg, #8c5c3f, #a46a50);
-  border-radius: 5px;
-  outline: none;
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-}
-
-.chris-sound-soundpad #volume-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 15px;
-  height: 15px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-}
-
-/* "Alle Sounds entfernen"-Button */
-.chris-sound-soundpad .clear-sounds {
-  background: linear-gradient(135deg, #a42b1d, #6b4b1a);
-  color: white;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 16px;
-  font-family: 'Uncial Antiqua', serif;
-  transition: background 0.3s, transform 0.2s;
-}
-
-.chris-sound-soundpad .clear-sounds:hover {
-  background: linear-gradient(135deg, #c33b2d, #e6b89c);
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-}
-
-/* Dekorative Trennlinien */
-.chris-sound-soundpad hr {
-  border: 0;
-  height: 2px;
-  background-image: linear-gradient(to right, #6b4b1a, #e6b89c, #6b4b1a);
-  margin: 15px 0;
-}
+/* Scoped to the v14 application; inherit Foundry's light/dark theme. */
+.chris-sound-module .window-content { overflow-y: auto; }
+.chris-sound-soundpad { display: flex; flex-direction: column; gap: 12px; padding: 12px; min-width: 0; }
+.chris-sound-soundpad .form-group { display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
+.chris-sound-soundpad .soundpad-drop-area { border: 2px dashed currentColor; border-radius: 8px; padding: 14px; text-align: center; opacity: .8; }
+.chris-sound-soundpad .sound-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.chris-sound-soundpad .sound-button { display: flex; flex-direction: column; height: auto; padding: 8px; white-space: normal; overflow-wrap: anywhere; line-height: 1.4; }
+.chris-sound-soundpad .sound-button small { opacity: .7; font-size: .8em; }
+.chris-sound-soundpad .sound-button.active { outline: 2px solid var(--color-warm-1, #cf9356); outline-offset: 1px; }
+.chris-sound-soundpad .selected-sound-info { display: flex; flex-wrap: wrap; gap: 6px; overflow-wrap: anywhere; }
+.chris-sound-soundpad .media-controls { display: flex; gap: 8px; }
+.chris-sound-soundpad .media-controls button { flex: 1; }
+.chris-sound-soundpad .volume-control { display: flex; flex-direction: column; gap: 6px; }
+.chris-sound-soundpad .volume-slider { width: 100%; }
+.chris-sound-soundpad .volume-value { float: right; }
+.chris-sound-soundpad button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }

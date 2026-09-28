@@ -2,25 +2,35 @@
   "CHRIS_SOUND_MODULE": {
     "Setting": {
       "EnableLoggingName": "Enable console logs",
-      "EnableLoggingHint": "Enables or disables console logs for the SoundPad.",
+      "EnableLoggingHint": "Enable diagnostic console logs for this browser.",
       "OpenSoundPad": "Open SoundPad",
       "SoundPadLabel": "SoundPad"
     },
     "UI": {
       "SelectTargetPlayer": "Select target player:",
       "DropAreaHint": "Drag sounds from a playlist here.",
-      "CurrentSound": "Current sound:",
+      "CurrentSound": "Selected sound:",
       "Volume": "Volume:",
-      "ClearSounds": "Remove all sounds"
+      "ClearSounds": "Remove all sounds from pad",
+      "Play": "Play",
+      "Stop": "Stop",
+      "Offline": "offline"
     },
     "Messages": {
       "SelectSoundFirst": "Please select a sound first.",
       "SelectPlayerFirst": "Please select a player.",
-      "InvalidDropType": "Invalid type for drag-and-drop data:",
-      "DropDataError": "Error while processing drag-and-drop data:",
-      "PlaylistNotFound": "Playlist not found:",
-      "SoundNotFoundInPlaylist": "Sound not found in playlist:",
-      "GmOnly": "SoundPad is only available for GMs."
+      "InvalidDropType": "Only playlist sounds can be added.",
+      "DropDataError": "The dropped data could not be read.",
+      "PlaylistNotFound": "Playlist not found.",
+      "SoundNotFoundInPlaylist": "The playlist sound is missing or has no valid audio path.",
+      "GmOnly": "SoundPad control is only available to GMs.",
+      "InvalidVolume": "Volume must be a number between 0 and 1.",
+      "InvalidCommand": "The sound command is invalid.",
+      "NameNotUnique": "No unique {kind} named \"{name}\" was found. Check names or use the ID/UUID API.",
+      "PlayerOffline": "\"{name}\" is offline.",
+      "Disconnected": "The connection to the Foundry server is unavailable.",
+      "PlaybackFailed": "Sound playback failed. Check the audio file, browser audio settings and console.",
+      "CommandFailed": "The sound command could not be completed."
     }
   }
 }

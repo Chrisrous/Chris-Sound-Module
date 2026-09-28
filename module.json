@@ -1,39 +1,16 @@
 {
   "id": "chris-sound-module",
   "title": "Chris Sound Module",
-  "description": "Ein Modul zum Senden und Empfangen von benutzerdefinierten Sound-Nachrichten.",
-  "version": "1.1.0",
-  "compatibility": {
-    "minimum": "12",
-    "verified": "12"
-  },
-  "esmodules": [
-    "scripts/socket-handler.js",
-	"scripts/SoundPad.js"
-  ],
-  "styles": [
-    "css/soundpad.css"
-  ],
+  "description": "Ein SoundPad für gezielte Sound-Wiedergabe an einzelne Spieler. Foundry v14 Release Candidate; Live-Abnahme ausstehend.",
+  "version": "2.0.0-rc.1",
+  "compatibility": { "minimum": "14", "maximum": "14" },
+  "esmodules": ["scripts/main.js"],
+  "styles": ["css/soundpad.css"],
   "languages": [
-    {
-      "lang": "de",
-      "name": "Deutsch",
-      "path": "lang/de.json"
-    },
-    {
-      "lang": "en",
-      "name": "English",
-      "path": "lang/en.json"
-    }
+    { "lang": "de", "name": "Deutsch", "path": "lang/de.json" },
+    { "lang": "en", "name": "English", "path": "lang/en.json" }
   ],
-  "authors": [
-    {
-      "name": "Chrisrous",
-      "flags": {}
-    }
-  ],
+  "authors": [{ "name": "Chrisrous", "flags": {} }],
   "socket": true,
-  "url": "https://github.com/Chrisrous/Chris-Sound-Module",
-  "manifest": "https://raw.githubusercontent.com/Chrisrous/Chris-Sound-Module/main/module.json",
-  "download": "https://github.com/Chrisrous/Chris-Sound-Module/releases/download/v1.1.0/chris-sound-module.zip"
+  "url": "https://github.com/Chrisrous/Chris-Sound-Module"
 }

@@ -1,132 +1,191 @@
-// Erweiterung des Socket-Handlers mit neuen Funktionen
+import {
+  MODULE_ID, SOCKET_CHANNEL, AUDIO_CHANNELS, message, requireGM,
+  logMessage, validVolume, validSource
+} from "./shared.js";
 
-// Importiert die Logging-Konfiguration aus dem SoundPad-Modul
-import { enableLogging } from './soundpad.js'; // Pfad anpassen
-
-// Hilfsfunktion für konsolenbasiertes Logging
-function logMessage(message, ...optionalParams) {
-  if (enableLogging) {
-    console.log(message, ...optionalParams);
+/** One controllable module sound per receiving browser. Never touches world playlists. */
+export class SoundPlayback {
+  constructor(getAudio = () => game.audio) {
+    this.getAudio = getAudio;
+    this.generation = 0;
+    this.current = null;
   }
-}
 
-// Initialisierung des Socket-Listeners, wenn das Spiel bereit ist
-Hooks.once('ready', () => {
-  logMessage("Chris Sound Module: Initializing socket listener...");
-
-  // Listener für eingehende Nachrichten vom Modul-Socket
-  game.socket.on('module.chris-sound-module', (data) => {
-    // Überprüft, ob die Aktion 'playSound' und der Benutzer korrekt ist
-    if (data.action === 'playSound' && data.userId === game.user.id) {
-      try {
-        // Sicherstellen, dass die Lautstärke innerhalb eines gültigen Bereichs liegt (0-1)
-        const volume = isNaN(data.data.volume) || data.data.volume < 0 || data.data.volume > 1 ? 0.8 : data.data.volume;
-        const sound = new Audio(data.data.src); // Erstellt eine neue Audio-Instanz
-        sound.volume = volume; // Setzt die Lautstärke
-        sound.loop = data.data.loop; // Setzt den Loop-Modus
-
-        // Startet die Wiedergabe des Sounds
-        sound.play().then(() => {
-          window.currentAudio = sound; // Speichert die Audio-Referenz global
-          logMessage(`Sound ${data.data.src} wird abgespielt.`);
-        }).catch(error => {
-          console.error(`Audio playback failed: ${error}`); // Fehler beim Abspielen
-        });
-      } catch (error) {
-        console.error(`Error playing audio: ${error}`); // Allgemeiner Fehler
+  async play(data) {
+    const generation = ++this.generation;
+    const previous = this.current;
+    const state = { sound: null, volume: data.volume };
+    this.current = state;
+    try {
+      if (previous?.sound?.playing) await previous.sound.stop();
+      const audio = this.getAudio();
+      // Do not auto-start a cancelled request after the browser's first gesture.
+      await audio.unlock;
+      if (generation !== this.generation) return false;
+      const sound = audio.create({
+        src: data.src,
+        context: audio[data.channel],
+        singleton: false,
+        preload: false,
+        autoplay: false
+      });
+      state.sound = sound;
+      await sound.load({ autoplay: false });
+      if (this.current !== state || generation !== this.generation) return false;
+      if (sound.failed) throw new Error(message("Messages.PlaybackFailed"));
+      await sound.play({
+        volume: state.volume, loop: data.loop,
+        onended: () => { if (this.current === state) this.current = null; }
+      });
+      if (this.current !== state || generation !== this.generation) {
+        await sound.stop();
+        return false;
       }
-    } else if (data.action === 'stopSound' && data.userId === game.user.id) {
-      // Stoppt die Wiedergabe, wenn 'stopSound' gesendet wird
-      if (window.currentAudio) {
-        window.currentAudio.pause();
-        window.currentAudio.currentTime = 0; // Setzt den Wiedergabeposition zurück
-        window.currentAudio = null; // Löscht die Audio-Referenz
-        logMessage(`Sound gestoppt.`);
+      // A volume command can arrive while load()/play() is pending.
+      if (sound.volume !== state.volume) await sound.fade(state.volume, { duration: 0 });
+      return true;
+    } catch (error) {
+      if (this.current === state) this.current = null;
+      if (state?.sound?.playing) {
+        try { await state.sound.stop(); } catch (cleanupError) { console.error(MODULE_ID, cleanupError); }
       }
-    } else if (data.action === 'changeVolume' && data.userId === game.user.id) {
-      // Ändert die Lautstärke des aktuellen Sounds
-      if (window.currentAudio) {
-        window.currentAudio.volume = data.volume;
-        logMessage(`Lautstärke wurde auf ${Math.round(data.volume * 100)}% geändert.`);
-      }
+      if (generation !== this.generation) return false;
+      throw error;
     }
-  });
-
-  logMessage("Chris Sound Module: Socket-Listener initialisiert.");
-});
-
-// Funktion zum Abspielen eines Sounds für einen Spieler
-export function playSoundForPlayer(playerName, playlistName, songName) {
-  // Findet den Spieler anhand des Namens
-  const player = game.users.find(user => user.name === playerName);
-
-  if (!player) {
-    console.error(`Spieler ${playerName} nicht gefunden`);
-    return;
   }
 
-  // Findet die Playlist anhand des Namens
-  const playlist = game.playlists.getName(playlistName);
-  if (!playlist) {
-    console.error(`Playlist ${playlistName} nicht gefunden`);
-    return;
+  async stop() {
+    ++this.generation;
+    const state = this.current;
+    this.current = null;
+    if (state?.sound?.playing) await state.sound.stop();
+    return true;
   }
 
-  // Findet den Song in der Playlist
-  const sound = playlist.sounds.find(s => s.name === songName);
-  if (!sound) {
-    console.error(`Song ${songName} nicht gefunden in Playlist ${playlistName}`);
-    return;
+  async setVolume(volume) {
+    if (!validVolume(volume)) throw new Error(message("Messages.InvalidVolume"));
+    if (!this.current) return false;
+    this.current.volume = volume;
+    // Sound.volume is a getter in v14. Use the public fade API, not assignment.
+    if (this.current.sound?.playing) await this.current.sound.fade(volume, { duration: 0 });
+    return true;
   }
-
-  // Erstellt die Sound-Daten
-  const soundData = {
-    src: sound.path, // Dateipfad des Sounds
-    volume: sound.volume, // Lautstärke
-    autoplay: true, // Automatische Wiedergabe
-    loop: sound.loop // Loop-Option
-  };
-
-  logMessage(`Sending playSound command to user ${player.id} with src: ${sound.path}`);
-  // Sendet die Daten über den Socket
-  game.socket.emit('module.chris-sound-module', {
-    action: 'playSound',
-    data: soundData,
-    userId: player.id
-  });
-
-  logMessage(`Song ${songName} wird für ${playerName} abgespielt`);
 }
 
-// Funktion zum Senden von generischen Befehlen an einen Spieler
+export const playback = new SoundPlayback();
+
+/** Validate only the small protocol supported by this module. */
+export function validCommand(data) {
+  if (!data || typeof data !== "object" || data.version !== 1) return false;
+  if (typeof data.userId !== "string" || typeof data.senderId !== "string") return false;
+  if (data.action === "stopSound") return true;
+  if (data.action === "changeVolume") return validVolume(data.volume);
+  return data.action === "playSound" && data.data && validSource(data.data.src)
+    && validVolume(data.data.volume) && typeof data.data.loop === "boolean"
+    && AUDIO_CHANNELS.has(data.data.channel);
+}
+
+export async function handleSocketMessage(data) {
+  if (!validCommand(data) || data.userId !== game.user.id) return false;
+  // Best-effort role filtering only. A raw module socket does NOT authenticate
+  // this client-supplied senderId. See docs/V14_MIGRATION.md for the trust boundary.
+  const sender = game.users.get(data.senderId);
+  if (!sender?.isGM || !sender.active) return false;
+  logMessage("Received", data.action);
+  if (data.action === "playSound") return playback.play(data.data);
+  if (data.action === "stopSound") return playback.stop();
+  return playback.setVolume(data.volume);
+}
+
+let socketRegistered = false;
+export function registerSocket() {
+  if (socketRegistered) return;
+  game.socket.on(SOCKET_CHANNEL, data => {
+    void handleSocketMessage(data).catch(error => {
+      console.error(`${MODULE_ID} | Playback failed`, error);
+      ui.notifications.error(message("Messages.PlaybackFailed"));
+    });
+  });
+  socketRegistered = true;
+}
+
+function uniqueByName(collection, name, kind) {
+  const matches = collection.contents.filter(entry => entry.name === name);
+  if (matches.length !== 1) throw new Error(message("Messages.NameNotUnique", { kind, name }));
+  return matches[0];
+}
+
+function targetUser(idOrName) {
+  const user = game.users.get(idOrName) ?? uniqueByName(game.users, idOrName, "User");
+  if (!user.active) throw new Error(message("Messages.PlayerOffline", { name: user.name }));
+  return user;
+}
+
+async function sendCommand(user, action, fields = {}) {
+  requireGM();
+  if (!user.active) throw new Error(message("Messages.PlayerOffline", { name: user.name }));
+  const payload = { version: 1, action, userId: user.id, senderId: game.user.id, ...fields };
+  if (!validCommand(payload)) throw new Error(message("Messages.InvalidCommand"));
+  // A module socket need not echo to its sender. Self-targeting is explicitly local.
+  if (user.id === game.user.id) return handleSocketMessage(payload);
+  if (game.socket.connected === false) throw new Error(message("Messages.Disconnected"));
+  game.socket.emit(SOCKET_CHANNEL, payload);
+  logMessage("Sent", action, "to", user.id);
+  return true; // Sent, not a remote playback acknowledgement.
+}
+
+function soundData(sound, options) {
+  if (sound?.documentName !== "PlaylistSound" || !validSource(sound.path)) {
+    throw new Error(message("Messages.SoundNotFoundInPlaylist"));
+  }
+  const volume = options.volume ?? (validVolume(sound.volume) ? sound.volume : 0.8);
+  if (!validVolume(volume)) throw new Error(message("Messages.InvalidVolume"));
+  return {
+    src: sound.path, volume, loop: Boolean(sound.repeat),
+    channel: AUDIO_CHANNELS.has(sound.channel) ? sound.channel : "music"
+  };
+}
+
+/** Preferred API: stable User ID and PlaylistSound UUID, resolved on every play. */
+export async function playSoundForUser(userId, soundUuid, options = {}) {
+  requireGM();
+  const user = game.users.get(userId);
+  if (!user) throw new Error(message("Messages.SelectPlayerFirst"));
+  const sound = typeof soundUuid === "string" ? await foundry.utils.fromUuid(soundUuid) : null;
+  return sendCommand(user, "playSound", { data: soundData(sound, options) });
+}
+
+export function stopSoundForUser(userId) {
+  requireGM();
+  const user = game.users.get(userId);
+  if (!user) throw new Error(message("Messages.SelectPlayerFirst"));
+  return sendCommand(user, "stopSound");
+}
+
+export function changeVolumeForUser(userId, volume) {
+  requireGM();
+  const user = game.users.get(userId);
+  if (!user) throw new Error(message("Messages.SelectPlayerFirst"));
+  return sendCommand(user, "changeVolume", { volume });
+}
+
+/** Legacy macro signatures retained; ambiguous names now fail instead of misrouting. */
+export async function playSoundForPlayer(playerName, playlistName, songName) {
+  requireGM();
+  const user = targetUser(playerName);
+  const playlist = uniqueByName(game.playlists, playlistName, "Playlist");
+  const sound = uniqueByName(playlist.sounds, songName, "Sound");
+  return sendCommand(user, "playSound", { data: soundData(sound, {}) });
+}
+
 export function controlSoundForPlayer(playerName, action, additionalData = {}) {
-  // Findet den Spieler anhand des Namens
-  const player = game.users.find(user => user.name === playerName);
-
-  if (!player) {
-    console.error(`Spieler ${playerName} nicht gefunden`);
-    return;
-  }
-
-  // Erzeugt die Payload für den Socket
-  const payload = {
-    action, // Aktion (z. B. 'stopSound', 'changeVolume')
-    userId: player.id, // Zielbenutzer-ID
-    ...additionalData // Zusätzliche Daten
-  };
-
-  // Sendet die Nachricht über den Socket
-  game.socket.emit('module.chris-sound-module', payload);
-  logMessage(`Befehl "${action}" an ${playerName} gesendet.`);
+  requireGM();
+  const user = targetUser(playerName);
+  if (action === "stopSound") return sendCommand(user, action);
+  if (action === "changeVolume") return sendCommand(user, action, { volume: additionalData.volume });
+  throw new Error(message("Messages.InvalidCommand"));
 }
 
-// Funktion zum Ändern der Lautstärke eines Spielers
 export function changeVolumeForPlayer(playerName, volume) {
-  // Delegiert an die controlSoundForPlayer-Funktion
-  controlSoundForPlayer(playerName, 'changeVolume', { volume });
+  return controlSoundForPlayer(playerName, "changeVolume", { volume });
 }
-
-// Exportiere die Funktionen global für die Verwendung in anderen Modulen
-window.controlSoundForPlayer = controlSoundForPlayer;
-window.changeVolumeForPlayer = changeVolumeForPlayer;
-window.playSoundForPlayer = playSoundForPlayer;

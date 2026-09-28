@@ -1,46 +1,41 @@
-<form class="chris-sound-soundpad">
-  <!-- Spieler-Auswahl -->
+<section class="chris-sound-soundpad">
   <div class="form-group">
-    <label for="player-select">{{localize "CHRIS_SOUND_MODULE.UI.SelectTargetPlayer"}}</label>
-    <select id="player-select" class="player-select form-control">
+    <label for="soundpad-player">{{localize "CHRIS_SOUND_MODULE.UI.SelectTargetPlayer"}}</label>
+    <select id="soundpad-player" class="player-select">
+      <option value="">{{localize "CHRIS_SOUND_MODULE.Messages.SelectPlayerFirst"}}</option>
       {{#each users}}
-      <option value="{{this.name}}">{{this.name}}</option>
+      <option value="{{id}}" {{#if selected}}selected{{/if}} {{#unless active}}disabled{{/unless}}>
+        {{name}}{{#unless active}} ({{localize "CHRIS_SOUND_MODULE.UI.Offline"}}){{/unless}}
+      </option>
       {{/each}}
     </select>
   </div>
-
-  <!-- Drop-Bereich für Sounds -->
-  <div class="soundpad-drop-area">
-    {{localize "CHRIS_SOUND_MODULE.UI.DropAreaHint"}}
-  </div>
-
-  <!-- Liste der Sounds -->
+  <div class="soundpad-drop-area">{{localize "CHRIS_SOUND_MODULE.UI.DropAreaHint"}}</div>
   <div class="sound-list">
     {{#each sounds}}
-    <button type="button" class="sound-button" data-sound-id="{{@index}}" data-sound-name="{{this.name}}" data-src="{{this.src}}">
-      {{this.name}}
+    <button type="button" class="sound-button {{#if selected}}active{{/if}}" data-action="selectSound"
+            data-sound-id="{{uuid}}" aria-pressed="{{#if selected}}true{{else}}false{{/if}}" title="{{playlist}}">
+      <span>{{name}}</span><small>{{playlist}}</small>
     </button>
     {{/each}}
   </div>
-
-  <!-- Anzeige des aktuell ausgewählten Sounds -->
-  <div class="selected-sound-info">
+  <div class="selected-sound-info" aria-live="polite">
     <span>{{localize "CHRIS_SOUND_MODULE.UI.CurrentSound"}}</span>
-    <span class="selected-sound-display">{{selectedSoundName}}</span>
+    <strong class="selected-sound-display">{{selectedSoundName}}</strong>
   </div>
-
-  <!-- Medien-Steuerung -->
   <div class="media-controls">
-    <button type="button" class="play-button" style="position: relative;">🎵 Play</button>
-    <button type="button" class="stop-button" style="position: relative;">🛑 Stop</button>
+    <button type="button" data-action="playSound" {{#unless hasSound}}disabled{{/unless}}>
+      <i class="fa-solid fa-play" aria-hidden="true"></i> {{localize "CHRIS_SOUND_MODULE.UI.Play"}}
+    </button>
+    <button type="button" data-action="stopSound" {{#unless hasPlayer}}disabled{{/unless}}>
+      <i class="fa-solid fa-stop" aria-hidden="true"></i> {{localize "CHRIS_SOUND_MODULE.UI.Stop"}}
+    </button>
   </div>
-
-  <!-- Lautstärkeregler -->
   <div class="volume-control">
-    <label for="volume-slider">{{localize "CHRIS_SOUND_MODULE.UI.Volume"}}</label>
-    <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.8" />
+    <label for="soundpad-volume">{{localize "CHRIS_SOUND_MODULE.UI.Volume"}} <span class="volume-value">{{volumePercent}}%</span></label>
+    <input id="soundpad-volume" class="volume-slider" type="range" min="0" max="1" step="0.01" value="{{volume}}" />
   </div>
-
-  <!-- Button: Alle Sounds entfernen -->
-  <button type="button" class="clear-sounds">{{localize "CHRIS_SOUND_MODULE.UI.ClearSounds"}}</button>
-</form>
+  <button type="button" class="clear-sounds" data-action="clearSounds" {{#unless hasSounds}}disabled{{/unless}}>
+    {{localize "CHRIS_SOUND_MODULE.UI.ClearSounds"}}
+  </button>
+</section>
