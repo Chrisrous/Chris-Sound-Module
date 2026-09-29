@@ -89,7 +89,9 @@
       "NoPlaybackReport": "Sound unknown: no report in this session",
       "UnknownSound": "Unknown sound",
       "RequestedVolume": "requested level",
-      "NoPreview": "No preview"
+      "NoPreview": "No preview",
+      "ClearTargets": "Clear selection",
+      "RecipientHint": "Select the recipients for Play, Volume and Stop. Selecting or clearing recipients does not start or stop audio."
     },
     "Messages": {
       "SelectSoundFirst": "Please select a sound first.",

@@ -15,20 +15,28 @@
         </div>
       </details>
     </div>
-    <details data-panel="targets" class="csm-target-picker" {{#if targetsOpen}}open{{/if}}>
-      <summary><strong>{{localize "CHRIS_SOUND_MODULE.UI.Recipients"}}:</strong> <span>{{targetSummary}}</span> <small>{{localize "CHRIS_SOUND_MODULE.UI.ChangeSelection"}}</small></summary>
-      <div class="csm-target-body">
+    <section class="csm-target-picker">
+      <div class="csm-target-heading">
+        <div><strong>{{localize "CHRIS_SOUND_MODULE.UI.Recipients"}}:</strong> <span class="csm-target-summary">{{targetSummary}}</span></div>
+        <button type="button" class="csm-recipient-toggle" data-action="toggleRecipients" aria-expanded="{{#if targetsOpen}}true{{else}}false{{/if}}" aria-controls="soundpad-recipients">{{localize "CHRIS_SOUND_MODULE.UI.ChangeSelection"}}</button>
+      </div>
+      <div id="soundpad-recipients" class="csm-target-body" {{#unless targetsOpen}}hidden{{/unless}}>
+        <p class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.RecipientHint"}}</p>
         <label>{{localize "CHRIS_SOUND_MODULE.UI.Group"}}<select data-field="group"><option value="">{{localize "CHRIS_SOUND_MODULE.UI.ManualSelection"}}</option>{{#each groups}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}</select></label>
-        <div class="recipient-list">{{#each users}}<label class="csm-check"><input data-field="target" type="checkbox" value="{{id}}" {{#if selected}}checked{{/if}}>{{name}}{{#unless active}} ({{localize "CHRIS_SOUND_MODULE.Status.offline"}}){{/unless}}</label>{{/each}}</div>
-        <button type="button" data-action="selectOnline">{{localize "CHRIS_SOUND_MODULE.UI.OnlinePlayers"}}</button>
+        <div class="recipient-list">{{#each users}}<label class="csm-check" for="soundpad-recipient-{{id}}"><input id="soundpad-recipient-{{id}}" name="csm-recipient-{{id}}" data-field="target" type="checkbox" value="{{id}}" {{#if selected}}checked{{/if}}><span>{{name}}{{#unless active}} ({{localize "CHRIS_SOUND_MODULE.Status.offline"}}){{/unless}}</span></label>{{/each}}</div>
+        <div class="csm-row">
+          <button type="button" data-action="selectOnline">{{localize "CHRIS_SOUND_MODULE.UI.OnlinePlayers"}}</button>
+          <button type="button" data-action="clearTargets" {{#unless hasTargets}}disabled{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.ClearTargets"}}</button>
+          <button type="button" data-action="toggleRecipients">{{localize "CHRIS_SOUND_MODULE.UI.Done"}}</button>
+        </div>
         <div class="csm-row">
           <label class="csm-grow">{{localize "CHRIS_SOUND_MODULE.UI.GroupName"}}<input data-field="groupName" type="text" maxlength="120" value="{{groupName}}"></label>
           <button type="button" data-action="saveGroup">{{localize "CHRIS_SOUND_MODULE.UI.SaveGroup"}}</button>
         </div>
-        {{#if canUpdateGroup}}<button type="button" data-action="updateGroup">{{localize "CHRIS_SOUND_MODULE.UI.UpdateGroup"}}: {{groupEditName}}</button>{{/if}}
-        {{#if groupEditName}}<button type="button" data-action="deleteGroup">{{localize "CHRIS_SOUND_MODULE.UI.DeleteGroup"}}: {{groupEditName}}</button>{{/if}}
+        <button type="button" data-action="updateGroup" {{#unless canUpdateGroup}}hidden{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.UpdateGroup"}}: <span class="csm-group-edit-name">{{groupEditName}}</span></button>
+        <button type="button" data-action="deleteGroup" {{#unless groupEditName}}hidden{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.DeleteGroup"}}: <span class="csm-group-edit-name">{{groupEditName}}</span></button>
       </div>
-    </details>
+    </section>
   </header>
 
   <div class="csm-filters csm-row">
@@ -76,7 +84,7 @@
   <footer class="csm-transport">
     <div class="csm-next">
       <div><span class="csm-kicker">{{localize "CHRIS_SOUND_MODULE.UI.NextStart"}}</span> <strong>{{savedLabel}}</strong>{{#if selected}} · {{savedPercent}}%{{/if}}</div>
-      <div class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.StartRecipients"}}: {{targetSummary}}</div>
+      <div class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.StartRecipients"}}: <span class="csm-target-summary">{{targetSummary}}</span></div>
       <div class="csm-row">
         <button class="csm-primary" type="button" data-action="playSound" {{#unless canPlay}}disabled{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.Play"}}</button>
         <button type="button" data-action="togglePreview">{{localize "CHRIS_SOUND_MODULE.UI.Preview"}}</button>
@@ -86,7 +94,7 @@
     </div>
     <div class="csm-live">
       <strong>{{localize "CHRIS_SOUND_MODULE.UI.LiveScope"}}</strong>
-      <div class="csm-live-targets">{{localize "CHRIS_SOUND_MODULE.UI.ControlRecipients"}}: {{targetSummary}}</div>
+      <div class="csm-live-targets">{{localize "CHRIS_SOUND_MODULE.UI.ControlRecipients"}}: <span class="csm-target-summary">{{targetSummary}}</span></div>
       <div class="csm-live-reports" aria-live="polite"></div>
       <div class="csm-row csm-live-controls">
         <label class="csm-grow">{{localize "CHRIS_SOUND_MODULE.UI.LiveVolume"}}: <span class="volume-value">{{livePercent}}%</span><input type="range" data-field="liveVolume" min="0" max="1" step="0.01" value="{{liveVolume}}" {{#unless hasTargets}}disabled{{/unless}}></label>

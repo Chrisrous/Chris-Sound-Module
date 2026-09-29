@@ -10,7 +10,8 @@ export class SoundPad extends HandlebarsApplicationMixin(ApplicationV2) {
     super(options);
     this.data = null; this.selectedSoundId = null; this.targetIds = []; this.groupId = "";
     this.search = ""; this.category = ""; this.favoritesOnly = false; this.drafts = new Map();
-    this.editorOpen = false; this.sortMode = false; this.panels = new Set();
+    this.editorOpen = false; this.sortMode = false; this.panels = new Set(["targets"]);
+    this.listenerController = null;
     this.padNameDraft = null; this.groupNameDraft = null; this.groupEditId = "";
     this.liveVolume = 0.8; this.targetRevision = 0; this.volumeGestures = new WeakMap();
     SoundPad.instance = this;
@@ -22,7 +23,7 @@ export class SoundPad extends HandlebarsApplicationMixin(ApplicationV2) {
     window: { title: "CHRIS_SOUND_MODULE.Setting.SoundPadLabel", icon: "fa-solid fa-music", resizable: true },
     actions: Object.fromEntries(["selectSound", "playSound", "stopSound", "clearSounds", "newPad", "renamePad", "deletePad",
       "favorite", "removeSound", "moveUp", "moveDown", "savePreset", "preview", "stopPreview", "panic",
-      "saveGroup", "deleteGroup", "selectOnline", "editSound", "cancelEdit", "toggleSort", "togglePreview", "updateGroup"].map(key => [key, SoundPad.onAction]))
+      "saveGroup", "deleteGroup", "selectOnline", "clearTargets", "toggleRecipients", "editSound", "cancelEdit", "toggleSort", "togglePreview", "updateGroup"].map(key => [key, SoundPad.onAction]))
   };
   static PARTS = { pad: { template: "modules/chris-sound-module/templates/soundpad.html" } };
   _canRender(options) { if (super._canRender(options) === false) return false; requireGM(); }
@@ -60,12 +61,19 @@ export class SoundPad extends HandlebarsApplicationMixin(ApplicationV2) {
   async _onRender(context, options) {
     await super._onRender(context, options);
     const root = this.element.querySelector(".chris-sound-soundpad");
-    root.addEventListener("change", event => { void this.runAction(() => this.onChange(event)); });
-    root.addEventListener("toggle", event => {
+    // A part may be reused or replaced. Remove listeners from the previous render.
+    this.listenerController?.abort();
+    const Controller = root.ownerDocument?.defaultView?.AbortController ?? AbortController;
+    this.listenerController = new Controller();
+    const listen = (type, handler, options = {}) => root.addEventListener(type, handler, {
+      ...options, signal: this.listenerController.signal
+    });
+    listen("change", event => { void this.runAction(() => this.onChange(event)); });
+    listen("toggle", event => {
       const panel = event.target.dataset.panel;
       if (panel) { if (event.target.open) this.panels.add(panel); else this.panels.delete(panel); }
-    }, true);
-    root.addEventListener("input", event => {
+    }, { capture: true });
+    listen("input", event => {
       const field = event.target.dataset.field;
       this.captureDraft(event.target);
       if (field === "search") { this.search = event.target.value; this.filterRows(); }
@@ -81,11 +89,76 @@ export class SoundPad extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     });
     const drop = root.querySelector(".soundpad-drop-area");
-    drop.addEventListener("dragover", event => { event.preventDefault(); if (event.dataTransfer) event.dataTransfer.dropEffect = "copy"; });
-    drop.addEventListener("drop", event => { void this.runAction(() => this._onDrop(event)); });
+    drop.addEventListener("dragover", event => { event.preventDefault(); if (event.dataTransfer) event.dataTransfer.dropEffect = "copy"; }, { signal: this.listenerController.signal });
+    drop.addEventListener("drop", event => { void this.runAction(() => this._onDrop(event)); }, { signal: this.listenerController.signal });
     this.filterRows(); this.renderStatus();
     for (const panel of root.querySelectorAll?.("details[data-panel]") ?? []) panel.open = this.panels.has(panel.dataset.panel);
+    this.refreshRecipients();
   }
+
+  /** Update only recipient controls. A checkbox click must not replace its own DOM. */
+  refreshRecipients() {
+    const root = this.element?.querySelector?.(".chris-sound-soundpad");
+    if (!root?.querySelectorAll) return;
+    const find = selector => root.querySelector(selector);
+    const all = selector => root.querySelectorAll?.(selector) ?? [];
+    const isOpen = this.panels.has("targets");
+    const toggle = find(".csm-recipient-toggle"), panel = find(".csm-target-body");
+    if (toggle) toggle.setAttribute("aria-expanded", String(isOpen));
+    if (panel) panel.hidden = !isOpen;
+    for (const summary of all(".csm-target-summary")) summary.textContent = this.targetSummary();
+    // A stored group can reference a removed User. Keep that recipient deselectable.
+    const list = find(".recipient-list");
+    if (list?.ownerDocument) {
+      const existing = new Set([...all('[data-field="target"]')].map(input => input.value));
+      for (const id of this.targetIds) {
+        if (existing.has(id)) continue;
+        const doc = list.ownerDocument, label = doc.createElement("label"), input = doc.createElement("input"), text = doc.createElement("span");
+        label.className = "csm-check"; label.dataset.missingUser = id;
+        input.type = "checkbox"; input.dataset.field = "target"; input.value = id;
+        input.id = `soundpad-recipient-${id}`; input.name = `csm-recipient-${id}`; label.htmlFor = input.id;
+        text.textContent = this.targetSummary([id]);
+        label.append(input, text); list.append(label);
+      }
+      for (const label of list.querySelectorAll("[data-missing-user]")) {
+        // Keep the node through its native change event; remove it on a later render.
+        const input = label.querySelector("input");
+        input.disabled = !game.users.get(input.value) && !this.targetIds.includes(input.value);
+      }
+    }
+    for (const input of all('[data-field="target"]')) input.checked = this.targetIds.includes(input.value);
+    const groupSelect = find('[data-field="group"]');
+    if (groupSelect) groupSelect.value = this.groupId;
+    const group = this.data?.groups.find(entry => entry.id === (this.groupId || this.groupEditId));
+    const name = find('[data-field="groupName"]');
+    // Do not replace an in-progress group-name edit when recipients change.
+    if (name) name.value = this.groupNameDraft ?? group?.name ?? "";
+    for (const label of all(".csm-group-edit-name")) label.textContent = group?.name ?? "";
+    const update = find('[data-action="updateGroup"]'), remove = find('[data-action="deleteGroup"]');
+    if (update) update.hidden = !Boolean(this.groupEditId && !this.groupId && group);
+    if (remove) remove.hidden = !Boolean(group);
+    const hasTargets = this.targetIds.length > 0;
+    for (const action of ["stopSound", "clearTargets"]) {
+      const button = find(`[data-action="${action}"]`);
+      if (button) button.disabled = !hasTargets;
+    }
+    const play = find('[data-action="playSound"]'), volume = find('[data-field="liveVolume"]');
+    if (play) play.disabled = !Boolean(this.selected && hasTargets);
+    if (volume) volume.disabled = !hasTargets;
+    this.renderStatus();
+  }
+
+  /** Selection affects future commands only. It never sends audio or edits a saved group. */
+  setRecipients(ids, { groupId = "" } = {}) {
+    const next = [...new Set(ids)];
+    const changed = next.length !== this.targetIds.length || next.some(id => !this.targetIds.includes(id));
+    if (groupId) { this.groupId = groupId; this.groupEditId = groupId; this.groupNameDraft = null; }
+    else { this.groupEditId = this.groupId || this.groupEditId; this.groupId = ""; }
+    if (changed) this.targetRevision++;
+    this.targetIds = next;
+    this.refreshRecipients();
+  }
+
   captureDraft(target) {
     const field = target.dataset.field;
     if (field === "padName") this.padNameDraft = target.value;
@@ -192,14 +265,20 @@ export class SoundPad extends HandlebarsApplicationMixin(ApplicationV2) {
       return this.mutate(data => { data.activePadId = id; });
     }
     if (field === "group") {
-      this.groupId = event.target.value; this.groupEditId = this.groupId; this.groupNameDraft = null; this.targetRevision++;
-      this.targetIds = [...(this.data.groups.find(group => group.id === this.groupId)?.userIds ?? [])];
-      return this.render();
+      const id = event.target.value;
+      const group = this.data.groups.find(entry => entry.id === id);
+      if (id && !group) return;
+      // Choosing individual selection keeps the current members; Clear is explicit.
+      return this.setRecipients(group ? group.userIds : this.targetIds, { groupId: id });
     }
     if (field === "target") {
-      this.groupEditId = this.groupId || this.groupEditId; this.groupId = ""; this.targetRevision++;
-      this.targetIds = [...this.element.querySelectorAll('[data-field="target"]:checked')].map(input => input.value);
-      return this.render();
+      const { value: id, checked } = event.target;
+      // Read the changed checkbox, not a :checked snapshot of a replacing part.
+      if (typeof checked !== "boolean" || (!game.users.get(id) && !this.targetIds.includes(id))) return;
+      if (checked === this.targetIds.includes(id)) return;
+      const next = new Set(this.targetIds);
+      if (checked) next.add(id); else next.delete(id);
+      return this.setRecipients([...next]);
     }
     if (field === "categoryFilter") { this.category = event.target.value; this.filterRows(); }
     if (field === "favoritesOnly") { this.favoritesOnly = event.target.checked; this.filterRows(); }
@@ -226,7 +305,15 @@ export class SoundPad extends HandlebarsApplicationMixin(ApplicationV2) {
     if (action === "toggleSort") { this.sortMode = !this.sortMode; return this.render(); }
     if (action === "togglePreview") return this.dispatch(getService().preview.current || getService().previewIntent ? "stopPreview" : "preview");
     if (action === "selectSound") { if (!sound) return; this.selectedSoundId = id; return this.render(); }
-    if (action === "selectOnline") { this.groupEditId = this.groupId || this.groupEditId; this.groupId = ""; this.targetRevision++; this.targetIds = game.users.contents.filter(user => user.active && !user.isGM).map(user => user.id); return this.render(); }
+    if (action === "toggleRecipients") {
+      const open = !this.panels.has("targets");
+      if (open) this.panels.add("targets"); else this.panels.delete("targets");
+      this.refreshRecipients();
+      if (!open) this.element?.querySelector?.(".csm-recipient-toggle")?.focus();
+      return;
+    }
+    if (action === "selectOnline") return this.setRecipients(game.users.contents.filter(user => user.active && !user.isGM).map(user => user.id));
+    if (action === "clearTargets") return this.setRecipients([]);
     if (action === "preview") { if (!this.selected) throw new Error(message("Messages.SelectSoundFirst")); return getService().previewSound(this.selected.uuid, { ...this.selected, label: this.selected.alias || this.selected.name }); }
     if (action === "stopPreview") return getService().stopPreview();
     if (action === "panic") return getService().panic();
@@ -305,5 +392,5 @@ export class SoundPad extends HandlebarsApplicationMixin(ApplicationV2) {
     return this.mutate(data => { const pad = data.pads.find(pad => pad.id === padId);
       if (!pad.sounds.some(entry => entry.uuid === sound.uuid)) pad.sounds.push(newEntry(sound)); });
   }
-  async close(options = {}) { getService().previewIntent = null; await getService().preview.stop({ immediate: true }); return super.close(options); }
+  async close(options = {}) { this.listenerController?.abort(); getService().previewIntent = null; await getService().preview.stop({ immediate: true }); return super.close(options); }
 }

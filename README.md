@@ -3,10 +3,19 @@
 GM-controlled, targeted playlist audio for Foundry VTT v14. German and English interface.
 Technical module ID: `chris-sound-module`. No additional runtime dependencies.
 
-## 2.0.0-rc.4: simplified interface and direct left launcher
+## 2.0.0-rc.5: recipient-selection hotfix
 
 **Manual-install release candidate, not live-Foundry certified.** The feature branch and
 PR remain separate from main and the published release. No `compatibility.verified` claim.
+
+### Recipient selection in RC5
+
+The recipient list is visible on first opening. **Change selection** opens/closes it,
+and **Done** collapses it. Tick or untick a player's box or label. Space works while
+that checkbox is focused. Selection no longer re-renders the entire window.
+**Clear selection** deselects all recipients without stopping any audio. **Online players**
+selects connected non-GM users. Group and sound drafts survive recipient edits.
+See [RC5 fix and live checks](docs/RC5_RECIPIENT_FIX.md) for reproduction and test limits.
 
 ### Opening
 
@@ -70,12 +79,12 @@ scene automation and sample-accurate synchronization are outside this release.
 ## Installation / upgrade
 
 1. Back up the world and `Data/modules/chris-sound-module`.
-2. Stop Foundry and replace that module folder with the same-named folder in the RC4 ZIP.
-3. Confirm `Data/modules/chris-sound-module/module.json` says `2.0.0-rc.4`.
+2. Stop Foundry and replace that module folder with the same-named folder in the RC5 ZIP.
+3. Confirm `Data/modules/chris-sound-module/module.json` says `2.0.0-rc.5`.
 4. Restart Foundry, enable **Chris SoundPad** in a v14 test world and reload every client.
-5. Run the [RC4 acceptance checklist](docs/RC4_INTERFACE.md).
+5. Run the [RC5 recipient checks](docs/RC5_RECIPIENT_FIX.md) and the earlier core acceptance checks.
 
-RC4 keeps RC2/RC3 library schema 1, setting keys and socket protocol 2. Existing pads,
+RC5 keeps RC2/RC3/RC4 library schema 1, setting keys and socket protocol 2. Existing pads,
 groups and personal settings need no migration. RC1 tabs use a different protocol and
 must not remain connected. This candidate does not support v12/v13 and deliberately
 omits stable `manifest`/`download` URLs. It is not published through the old update channel.
@@ -140,11 +149,15 @@ npm test
 python3 tools/package.py
 ```
 
-RC4 local validation: **135 passing automated tests**, including the original transport
+Historical RC4 validation: **135 passing automated tests**, including the original transport
 simulation, plus 13 separate native-browser harness checks. The harness loads actual module
 JS/CSS but uses custom template expansion and Foundry doubles. It is **not real Foundry,
 its Handlebars runtime, real networked multiplayer or real WebAudio acceptance**.
 CI validates and builds only, never publishes. Check the PR for its independently reported result.
+
+RC5 adds 16 recipient-selection regression tests. The 46 locally available recipient/RC4
+tests and 14 offline Chromium checks pass. The full repository suite is checked independently
+in GitHub Actions. See the current PR and [RC5 fix record](docs/RC5_RECIPIENT_FIX.md).
 
 See [RC4 design and acceptance](docs/RC4_INTERFACE.md), [RC3 launcher history](docs/RC3_LAUNCHER.md),
 [RC2 core migration](docs/V14_MIGRATION.md) and [RC1 archive](docs/RC1_MIGRATION_ARCHIVE.md).

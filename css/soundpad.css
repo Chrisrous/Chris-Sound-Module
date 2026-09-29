@@ -1,5 +1,5 @@
 /* All rules are scoped. No canvas/tool styling is changed. */
-.chris-sound-module .window-content { padding: 12px; overflow: hidden; }
+.chris-sound-module .window-content { padding: 12px; overflow: auto; }
 .chris-sound-module .chris-sound-soundpad {
   display: flex; flex-direction: column; gap: 10px; height: 100%; min-height: 0;
   container-type: inline-size; color: var(--color-text-primary, inherit);
@@ -26,7 +26,13 @@
   background: var(--csm-panel); box-shadow: 0 5px 18px #0006; display: flex; flex-direction: column; gap: 8px;
 }
 .chris-sound-module .csm-menu-body { right: 0; width: 260px; }
-.chris-sound-module .csm-target-body { left: 0; right: 0; max-height: 360px; overflow-y: auto; }
+/* The recipient picker stays in normal flow: no popup behind the sound list. */
+.chris-sound-module .csm-target-body { position: static; max-height: min(240px, 30vh); overflow-y: auto; margin-top: 6px; }
+.chris-sound-module .csm-target-heading { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.chris-sound-module .csm-target-heading > div { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.chris-sound-module .csm-recipient-toggle { flex: 0 0 auto; width: auto; }
+.chris-sound-module .recipient-list .csm-check { min-height: 30px; cursor: pointer; }
+.chris-sound-module .recipient-list input[type="checkbox"] { width: 18px; height: 18px; margin: 0; cursor: pointer; }
 .chris-sound-module .recipient-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 6px; }
 .chris-sound-module .csm-target-picker small { opacity: .8; }
 .chris-sound-module .csm-filters { flex: 0 0 auto; }

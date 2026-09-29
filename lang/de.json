@@ -89,7 +89,9 @@
       "NoPlaybackReport": "Sound unbekannt: keine Rückmeldung in dieser Sitzung",
       "UnknownSound": "Sound unbekannt",
       "RequestedVolume": "angeforderter Wert",
-      "NoPreview": "Keine Vorschau"
+      "NoPreview": "Keine Vorschau",
+      "ClearTargets": "Auswahl aufheben",
+      "RecipientHint": "Wähle die Empfänger für Abspielen, Lautstärke und Stopp. An- oder Abwählen startet und stoppt keine Sounds."
     },
     "Messages": {
       "SelectSoundFirst": "Bitte zuerst einen Sound auswählen.",

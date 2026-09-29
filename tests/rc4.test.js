@@ -105,7 +105,7 @@ test("removing the selected entry does not stop existing audio",async()=>{
 });
 test("modified group becomes individual selection without overwriting saved group",async()=>{
   await pad.mutate(d=>d.groups.push({id:"g",name:"Party",userIds:["player"]}));pad.groupId="g";
-  pad.element.querySelectorAll=()=>[{value:"other"}];await pad.onChange(change("target","other"));
+  await pad.onChange({target:{dataset:{field:"target"},value:"other",checked:true}});
   assert.equal(pad.groupId,"");assert.equal(pad.groupEditId,"g");assert.deepEqual(library.read().groups[0].userIds,["player"]);
   assert.equal((await pad._prepareContext({})).canUpdateGroup,true);
 });
