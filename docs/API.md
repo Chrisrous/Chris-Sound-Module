@@ -2,7 +2,7 @@
 
 Use `game.modules.get("chris-sound-module").api` after Foundry's `ready` event. Control methods
 require a GM. Public methods use linear gain in [0, 1], not the perceptual UI slider position.
-RC6's one-slider UI does not change the API defaults or packet protocol.
+The shared UI slider does not change API defaults or the packet protocol.
 
 ```js
 const api = game.modules.get("chris-sound-module").api;

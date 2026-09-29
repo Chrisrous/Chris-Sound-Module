@@ -1,90 +1,84 @@
 # Chris SoundPad
 
-Target playlist sounds to selected Foundry VTT users without changing ordinary world playlists.
+Play sounds for selected players in Foundry VTT without changing ordinary world playlists.
 
-**Stable release: 2.0.0 | Foundry v14 only | MIT**
+**Version 2.0.0 | Foundry v14 | MIT**
 
-The owner confirmed successful RC6 testing and authorized this release on 2026-09-29.
-The shipped JavaScript, templates, CSS and translations are unchanged from that candidate.
-Compatibility is declared for Foundry generation 14. An exact tested build was not supplied.
+## Install
 
-## Start here
-
-1. Back up your world and existing module directory.
-2. In Foundry Setup, open **Add-on Modules > Install Module**, paste the manifest URL below
-   and install. Existing installations using this URL can use **Update**.
-3. Enable **Chris SoundPad** in your world and reload every connected browser.
-   For manual ZIP installation, stop Foundry first and replace only
-   `Data/modules/chris-sound-module`.
-4. As GM, use the left headphones button or **Open Chris SoundPad** in the Playlists sidebar.
-5. Drag a playlist sound into the pad, select recipients, choose a sound and press **Play**.
-
-Installation and update manifest:
+In Foundry Setup, open **Add-on Modules > Install Module** and paste this manifest URL:
 
 ```text
 https://raw.githubusercontent.com/Chrisrous/Chris-Sound-Module/main/module.json
 ```
 
-[Release and manual ZIP](https://github.com/Chrisrous/Chris-Sound-Module/releases/tag/v2.0.0)
+Enable **Chris SoundPad** in your world and reload all connected browsers. Existing installations
+using this manifest can use **Update**. For manual installation, back up your world, stop Foundry
+and replace `Data/modules/chris-sound-module` with the folder from the release ZIP.
 
-RC2 through RC6 pads, groups and personal preferences need no migration.
-RC installations without an update URL may require one manual update to 2.0.0.
-This version does not support v12/v13. The old v1.1.0 release remains available for v12.
+[Download 2.0.0](https://github.com/Chrisrous/Chris-Sound-Module/releases/tag/v2.0.0)
 
-## One volume control
+Version 2.0.0 requires Foundry v14. Version 1.1.0 remains available for v12.
+Stored pads, groups and preferences from RC2 through RC6 need no conversion. Candidates without
+an update URL need a one-time manual update. Do not delete your world data.
 
-Choose a sound to load its saved default into the one slider. Moving it changes the level for
- the **next Play or Preview only**. It does not change audio already playing.
+## Use
 
-- **Apply to recipient playback** sends that level to the named recipients' current/pending module audio.
-- **Save as sound default** persists that level for the selected entry. It does not affect live audio.
+Open the pad with the headphones button on the left or **Open Chris SoundPad** in the Playlists
+sidebar. Drag a playlist sound into a pad, select recipients, choose a sound and press **Play**.
+**Preview** plays locally without sending the sound to players.
 
-Selecting sound B while sound A is playing never stops, relabels or changes A. Stop always
-addresses the displayed recipient selection. Clear selection is not Stop.
+### One volume control
 
-## Included
+Selecting a sound loads its saved default into the slider. Adjusting the slider prepares the
+**next Play or Preview** and leaves current playback unchanged.
 
-Persistent named pads per GM/world, saved recipient groups, search, categories, favorites,
-aliases and ordering. Per-sound loop/fade settings, local preview, individual recipient
-feedback, personal player volume/mute and an independent emergency stop. English and German.
-Both launchers and legacy macros are retained. No additional Foundry module dependencies.
+- **Apply to recipient playback** changes the current or pending module audio of the displayed recipients.
+- **Save as sound default** stores the value for the selected entry without changing current playback.
+
+Selecting sound B while A plays does not stop, rename or change A. **Stop** affects the displayed
+recipient selection. **Clear selection** only removes recipients from the selection.
+
+## Features
+
+Named pads and recipient groups are saved per GM and world. Organize sounds with search,
+categories, favorites, aliases and manual ordering. Each sound supports repeat and fade presets.
+
+Separate local preview, per-recipient status, personal player volume/mute and an emergency stop
+keep playback under control. Both opening buttons and the existing macro API are available.
+The interface is available in English and German. No additional Foundry modules are required.
 
 ## Documentation
 
-| Document | Purpose |
+| Document | Contents |
 | --- | --- |
-| [User guide](docs/USER_GUIDE.md) | Everyday use and troubleshooting |
-| [Deutsche Anleitung](docs/USER_GUIDE_DE.md) | Bedienung, Lautstärke und Installation |
-| [API and macros](docs/API.md) | Stable public methods, return values and examples |
-| [Architecture](docs/ARCHITECTURE.md) | Responsibilities, data and trust boundaries |
-| [Testing and releases](docs/TESTING.md) | Local checks, real-client acceptance and packaging |
-| [Changelog](CHANGELOG.md) | Concise version history |
-| [Contributing](CONTRIBUTING.md) | Development workflow and conventions |
-| [Security](SECURITY.md) | Known limits and responsible reporting |
-| [Historical records](https://github.com/Chrisrous/Chris-Sound-Module/tree/main/docs/archive) | Preserved RC1-RC5 development notes |
+| [User guide](docs/USER_GUIDE.md) | Setup, playback and troubleshooting |
+| [Deutsche Anleitung](docs/USER_GUIDE_DE.md) | Bedienung und Installation |
+| [API and macros](docs/API.md) | Methods, return values and examples |
+| [Architecture](docs/ARCHITECTURE.md) | Components, state and transport |
+| [Testing and releases](docs/TESTING.md) | Tests, packaging and release workflow |
+| [Changelog](CHANGELOG.md) | Version history |
+| [Contributing](CONTRIBUTING.md) | Development conventions |
+| [Security](SECURITY.md) | Transport limits and vulnerability reporting |
+| [Version notes](https://github.com/Chrisrous/Chris-Sound-Module/tree/main/docs/archive) | Earlier candidate behavior |
 
 ## Development
 
-Node.js 22+ and Python 3. No `npm install` is required for the baseline checks.
+Node.js 22+ and Python 3 are required. There are no npm dependencies to install.
 
 ```sh
 npm run validate
 npm run package
 ```
 
-Tests use API doubles and an in-process relay. CI checks Linux and Windows, builds a
-reproducible module ZIP and makes it available as a build artifact. Normal PR/main CI is read-only.
-The separate 2.0.0 publication workflow runs only on `release/2.0.0`, checks the accepted
-RC6 runtime against its exact commit, and verifies draft and public release downloads.
-It does not merge pull requests or change the main branch. See [Testing and releases](docs/TESTING.md).
-Do not commit `dist/`, user data, audio assets, secrets or generated test logs.
+CI runs on Linux and Windows. Package builds include a checksum and exclude development files.
+See [Testing and releases](docs/TESTING.md) for the test setup and publishing sequence.
+Do not commit generated packages, world data, audio assets or credentials.
 
-## Limits
+## Limitations
 
-Reports are session-local client responses, not proof of audibility or an authoritative global
-mixer. Multiple tabs can each play audio. The raw module socket and its acknowledgements are
-not authenticated by this module and are not confidential. See [Security](SECURITY.md).
+Playback status is session-local feedback, not proof that a player can hear the sound. Multiple
+browser tabs may each play audio. Module socket messages are not confidential and do not provide
+server-authenticated sender identity. See [Security](SECURITY.md).
 
-Developed by Chrisrous. [MIT License](LICENSE).
-
-Packaging regressions also run with `npm run test:package` (Python unittest).
+[MIT License](LICENSE) · Developed by Chrisrous.

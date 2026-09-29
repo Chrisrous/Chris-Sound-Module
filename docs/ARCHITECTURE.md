@@ -38,9 +38,9 @@ independent. StatusTracker bounds storage and distinguishes missing/unknown repo
 This is not server-enforced authorization or confidential transport. See [Security](../SECURITY.md).
 Settings revision checks detect many stale edits, but are not atomic server compare-and-swap.
 
-## Tests and change scope
+## Test organization
 
-The RC6 refactor separates presentation from orchestration. Audio, transport, persistence and
-launcher behavior are not rewritten. Existing tests are retained, with explicit changes to the
-superseded two-slider interaction expectations. Purpose-named suites replace release-number
-naming. Historical documents preserve the earlier contracts in `archive/`.
+Tests are grouped by behavior: core playback/storage, launchers, recipients, playback scopes,
+volume control, transport and releases. Unit tests use isolated API and DOM doubles. Packaging
+tests check file integrity, reproducibility and documentation links. Earlier interface behavior
+is documented in `archive/`.

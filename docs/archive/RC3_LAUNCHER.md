@@ -1,5 +1,6 @@
 # RC3: visible SoundPad launcher
 
+Historical version notes. For current behavior, see [the user guide](../USER_GUIDE.md).
 Date: 2026-09-29. Candidate: `2.0.0-rc.3`.
 Baseline: RC2 commit `af8a6860d02620014b916f6665dd7b256a35ca3a`.
 
@@ -29,43 +30,7 @@ The library schema, user-setting keys, sound documents, socket protocol, audio p
 target groups, preview and recipient preferences are unchanged from RC2. Stored RC2 pads
 are retained. No new dependency, keybinding, export/import or release publication is added.
 
-## Validation
-
-- 22 new Node tests pass locally in `tests/launcher.test.js` using explicit DOM/API doubles.
-  Coverage includes GM/player gating, translated/escaped labels, idempotency, replacement
-  roots, empty directories, ownerDocument, sidebar/popout placement, startup ordering,
-  opening/reopening/minimization, pending-click deduplication and failure recovery.
-- The existing static checker passes: 8 runtime modules, 97 EN/DE keys, exact-case imports,
-  matching manifest/package versions, manifest assets and basic template/action checks.
-- A separate local Chromium 144.0.7559.96 check used the actual launcher module and native
-  browser DOM/events: mouse, Enter, Space, repeated hooks, restoration, popout, preservation
-  of existing controls and player-side removal passed without uncaught browser errors.
-  ApplicationV2 and game were still doubles; this was not Foundry's real sidebar or CSS.
-- Existing core tests are preserved unchanged and run with the new tests in GitHub CI.
-  Check the workflow for the resulting commit rather than treating old CI as current evidence.
-
-No live Foundry instance, real Foundry sidebar rendering, real Handlebars render or real
-multiplayer audio test was performed. Compatibility.verified remains unset and the PR
-must remain a draft pending live acceptance. Main and the published release are unchanged.
-
-## Live acceptance
-
-Back up the world and replace `Data/modules/chris-sound-module` with the RC3 folder.
-Restart Foundry and reload all browsers. No re-entry of RC2 pads should be necessary.
-
-- [ ] As GM, open the right-hand Playlists tab: one labelled button appears at the top.
-- [ ] Click it, click again, minimize the pad, click again: the same pad is foregrounded.
-- [ ] Edit a preset without saving, click the launcher: unsaved text remains intact.
-- [ ] Create/update a playlist and reopen/pop out its sidebar: no missing/duplicate button.
-- [ ] Navigate to the button with Tab and activate with Enter and Space.
-- [ ] With no active scene or an empty playlist list, the button still opens the pad.
-- [ ] As player, no GM launcher appears. Existing personal audio settings remain available.
-- [ ] Check stored pads/groups and an existing macro, then complete the RC2 audio checklist.
-- [ ] Inspect consoles for errors with the actual installed theme/sidebar extensions.
-
 ## Primary API references
-
-Reviewed on 2026-09-29 against documentation identifying v14.368 Stable:
 
 - https://foundryvtt.com/api/functions/hookEvents.renderApplicationV2.html
 - https://foundryvtt.com/api/classes/foundry.applications.sidebar.tabs.PlaylistDirectory.html

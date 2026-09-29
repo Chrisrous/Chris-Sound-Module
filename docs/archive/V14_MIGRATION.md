@@ -1,13 +1,14 @@
 # Foundry v14 migration and core expansion
 
+Historical version notes. For current behavior, see [the user guide](../USER_GUIDE.md).
 Date: 2026-09-29. Candidate: **2.0.0-rc.2**.
 Baseline: `feature/foundry-v14`, RC1 commit `a44c0604b7807bee68a4e040a7b8502b7e9224cd`.
-The original 36-test RC1 migration record is retained in [the historical archive](RC1_MIGRATION_ARCHIVE.md).
-Statements there about missing persistence, feedback and groups describe RC1 only.
+The initial API migration is documented in [the RC1 notes](RC1_MIGRATION_ARCHIVE.md).
+RC2 adds persistent storage, feedback and groups.
 
-## Implemented scope
+## Features
 
-| Approved feature | Implementation |
+| Feature | Implementation |
 | --- | --- |
 | Persistent named pads | Hidden `scope: user` setting, versioned validated data, queued writes, stale-revision checks |
 | Playback feedback | Request/session IDs, per-client status sequences, 10-second no-response indicator, independent group outcomes |
@@ -41,11 +42,6 @@ tracks, scene automation and sample-accurate group synchronization. Existing ope
   unrelated renders; save applies them. Volume is perceptually converted and sent once on change.
 - `main.js`: init registration, ready receiver/API setup, userConnected updates and personal preferences.
 
-The public v14 documentation was consulted for user-scoped settings, ApplicationV2, DialogV2,
-Sound playback/fades, audio unlock and volume conversion, and userConnected. Retrieved public
-pages identify v14.368, with one AudioHelper response identifying v14.365. This is an API review,
-not execution against either installed Foundry build.
-
 ## Trust, transport and operational boundaries
 
 This remains a raw module socket. Packets can be inspected by other connected clients, and the
@@ -59,67 +55,11 @@ when transport is unavailable; missing acknowledgements must not be presented as
 automatic retry occurs. Emergency stop reaches connected cooperative clients only. A failed local
 stop does not prevent sending emergency commands to other recipients. Clock-based packet expiry
 allows a bounded age/future window and assumes reasonably aligned device clocks (expiry at send
-plus 120 seconds, accepted up to 180 seconds ahead). Test with real machines before release.
+plus 120 seconds, accepted up to 180 seconds ahead). Device clocks should be reasonably aligned.
 
 Same-account, different-window edits use best-effort revision detection, not an atomic server
 compare-and-swap. Different GM accounts have separate data. Do not edit one GM library concurrently
 in multiple windows. User settings/world backups are not confidential storage for GM secrets.
-
-## Automated validation
-
-Local environment: Node.js 22.16.0, Python 3, case-sensitive Linux filesystem.
-Local result: **83/83 tests pass**, including 9 simulated multi-client transport tests.
-Static checks pass for 7 runtime modules and 97 EN/DE localization keys.
-The expanded tests replace and extend the RC1 behavioral suite for protocol 2 and persistent UI.
-They cover malformed packets, source validation, permissions, repeat/fade options, personal limits,
-independent preview, cancellation during UUID resolution/unlock/load/native start/fade-out,
-request expiry and duplicates, status ordering/timeouts/multiple tabs, user/world persistence,
-write failure and conflicts, library validation, UI operations, native slider events and legacy macros.
-An additional in-process relay suite exercises GM and separate player service instances, per-target
-acknowledgements, a missing module receiver, unlock cancellation, personal mute, global stop,
-repeated packets and two tabs for one user.
-
-Run `npm run check`, `npm test` and `python3 tools/package.py`. A generated test transcript records
-actual results; CI results must be checked separately. Tests use doubles. Static template block,
-localization and action checks are not a Handlebars compiler or an actual browser render.
-
-## Required live checklist before publishing
-
-Record exact Foundry build, game system, browsers, enabled modules and results. Use a backed-up
-v14 test world, a GM browser and at least two player browsers, all on RC2.
-
-- [ ] Install, init/ready, module settings and English/German UI load without console errors.
-- [ ] Open, resize, close/reopen and change themes. Confirm the list and controls remain usable.
-- [ ] Create/rename/delete pads; drop actual playlist sounds; duplicates stay single; search,
-      categories, favorites and ordering work. Source playlists and audio files remain untouched.
-- [ ] Save preset aliases/category/repeat/fades. Edit options, move the volume slider or select
-      targets before saving: unsaved option drafts must not silently disappear.
-- [ ] Reload Foundry/browser and use another browser with the same GM/world: saved pads/groups
-      persist. Different GM accounts/worlds remain separate. Test write failure and stale editing.
-- [ ] Create/update/delete target groups, including offline/deleted users. Other available members
-      still receive audio and each has an honest status. No old command plays when users reconnect.
-- [ ] Preview only on GM, while an incoming/self-targeted module sound is already playing.
-      Stop preview and close pad without interrupting that incoming sound. Remove the selected
-      entry while preview plays and check the dedicated preview Stop remains available.
-- [ ] Individual playback: selected player hears audio, unselected player and GM do not. Check
-      live loading/started/ended/error reports, absent receiver timeouts and both tabs of one user.
-- [ ] Browser audio initially locked, slow/missing files, repeat on/off, each Foundry audio channel.
-      Stop while locked/loading/starting. Wait then unlock: cancelled sounds must remain cancelled.
-- [ ] Test personal factor and mute before Play, during slow loading, during fade-in/out and after
-      GM volume changes. Verify ordinary playlists and channel controls remain unaffected.
-- [ ] Test sequential fades and rapid replacement. Emergency stop during active fade, preview,
-      queued/native start and slow UUID resolution must prevent obsolete playback returning.
-- [ ] Disconnect/reconnect GM and players. No automatic replay. Unreachable recipients must not
-      be reported as confirmed stopped. Test aligned and deliberately skewed device clocks.
-- [ ] Existing name-based macros and new ID/group/preview/panic APIs work. Inspect consoles for
-      deprecations, rejected promises and conflicts with other enabled modules.
-
-## Release gate
-
-Keep PR #6 as draft until live results are recorded. Do not claim `compatibility.verified` or publish
-this RC to the stable update channel. After successful live checks, choose a stable version,
-synchronize package/manifest versions, set verification to the tested build, and use real released
-manifest/ZIP asset URLs. Validate the downloaded archive layout and included manifest.
 
 ## Primary references
 
