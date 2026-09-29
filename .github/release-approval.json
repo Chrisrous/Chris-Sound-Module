@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "approved": true,
+  "approved_by": "Chrisrous",
+  "approval_date": "2026-09-29",
+  "approval_basis": "Owner reported successful RC6 testing and explicitly authorized publication. No per-case test log or exact environment versions were supplied.",
+  "tested_candidate": "2.0.0-rc.6",
+  "tested_commit": "34063940bf4a3468693c453d071af1cddfbdfdbd",
+  "foundry_generation": "14",
+  "exact_foundry_build": null,
+  "game_system_version": null,
+  "browser_version": null,
+  "runtime_sha256": {
+    "css/soundpad.css": "79b76f6542bb54e0ddd04818a6e75cc4b13b680461b724b7696e0492f9cf4d4c",
+    "lang/de.json": "3259b34d53e07ab5d4952fa0500696566df356ea1d153fdb199166cdaf45aee4",
+    "lang/en.json": "75f0e0835111dd4a2ea538f5c04da9a35fe83105492265334f522efd05c8db2a",
+    "scripts/SoundPad.js": "515ab799686a844a149d6305ff6a693f1be0d0ad2a4669cd71eda6c195cb8e0e",
+    "scripts/audio.js": "dc18e6403cd28aa191af7e8b6ddf0d103507170b34dc185f75072e4a7f77b924",
+    "scripts/launcher.js": "089dad8bc3ff613f862314d979f986ac6f8a68a65004d624303629cdfe0b3945",
+    "scripts/library.js": "a009af81e94d8c7a1471c7f32a5eda67c2a1f1d67992ee9c3c15af0c0367c91c",
+    "scripts/main.js": "d34348a5c23f7d6feac0272a27c6bf9e8f52f194a500bba4748be54ea03695d3",
+    "scripts/presentation.js": "e986f96217a694be199ca066661c2def53989998b79aeb6d0a25a6a933521a44",
+    "scripts/shared.js": "210b5c07641064f0e5c7d94f857e4c3a0dcb5d3117711f0625aafb108c81dbe2",
+    "scripts/socket-handler.js": "1b414bef639de38b4e26b6d30328174ae5017d5a756e6255e39e0497eb8c574d",
+    "scripts/status.js": "08a5919c66583e2dbdcbc551350f11b5079ac5e6977550371e693aa393b3e7cc",
+    "scripts/volume-control.js": "a10f08b2bb6ac84ee0110b2faf42a25a34d7879badc64df37f7852eefa5a3424",
+    "templates/soundpad.html": "dc5fd877ddc0aff0890cd8cd8a97909058efee15ba6a000215bf703c711493c5"
+  }
+}

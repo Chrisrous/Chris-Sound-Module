@@ -1,6 +1,19 @@
 # Changelog
 
-Candidates are not stable releases. Historical implementation records are in `docs/archive/`.
+Stable versions have public GitHub releases. Historical candidate records remain in `docs/archive/`.
+
+## 2.0.0 - 2026-09-29
+
+### Released
+- First stable Foundry v14 release, promoted after owner-reported successful RC6 testing.
+- Includes the v14 API migration, all nine core improvements, both launchers, recipient fixes,
+  one-volume-control interface and repository cleanup documented below.
+- No runtime, template, CSS or localization changes from the tested 2.0.0-rc.6 candidate.
+- Restore the original stable manifest URL and a versioned release ZIP download.
+- Add an owner-authorized, release-branch-only workflow with Linux/Windows validation,
+  draft-asset verification and anonymous public-download verification. Normal CI stays read-only.
+- Keep technical ID, stored schema 1, settings and socket protocol 2 unchanged.
+- Foundry generation 14 is owner-confirmed. Exact build/system/browser versions were not supplied.
 
 ## 2.0.0-rc.6
 
@@ -33,4 +46,4 @@ Candidates are not stable releases. Historical implementation records are in `do
 - Preserve legacy macros, add cancellation guards, localization, tests and packaging.
 
 ## 1.1.0
-- Previous published version targeting Foundry v12. Kept on the existing stable channel.
+- Previous published version targeting Foundry v12. Retained as the v1.1.0 GitHub release.

@@ -1,0 +1,99 @@
+name: Publish Chris SoundPad 2.0.0
+
+# The owner accepted RC6 and authorized this release on 2026-09-29.
+# Only this explicit release branch publishes. Pull requests never publish.
+on:
+  push:
+    branches: [release/2.0.0]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-chris-soundpad-2.0.0
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: github.repository == 'Chrisrous/Chris-Sound-Module' && github.ref == 'refs/heads/release/2.0.0'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Confirm accepted runtime is unchanged
+        run: git diff --exit-code 34063940bf4a3468693c453d071af1cddfbdfdbd HEAD -- scripts templates css lang
+      - run: npm run validate
+      - run: python tools/package.py
+
+  publish:
+    needs: validate
+    if: github.repository == 'Chrisrous/Chris-Sound-Module' && github.ref == 'refs/heads/release/2.0.0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Build accepted release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code 34063940bf4a3468693c453d071af1cddfbdfdbd HEAD -- scripts templates css lang
+          python -c 'import json; m=json.load(open("module.json")); assert m["id"] == "chris-sound-module"; assert m["version"] == "2.0.0"; assert m["download"] == "https://github.com/Chrisrous/Chris-Sound-Module/releases/download/v2.0.0/chris-sound-module.zip"'
+          python tools/package.py --output dist/chris-sound-module.zip
+          cp module.json dist/module.json
+          cd dist
+          sha256sum chris-sound-module.zip module.json > SHA256SUMS
+          sha256sum --check SHA256SUMS
+      - name: Create draft release and upload assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: Chrisrous/Chris-Sound-Module
+        run: |
+          set -euo pipefail
+          gh release create v2.0.0 dist/chris-sound-module.zip dist/module.json dist/SHA256SUMS --draft --target "$GITHUB_SHA" --title "Chris SoundPad 2.0.0" --notes-file docs/RELEASE_NOTES_2.0.0.md
+      - name: Verify uploaded draft assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: Chrisrous/Chris-Sound-Module
+        run: |
+          set -euo pipefail
+          gh release download v2.0.0 --dir verified-draft --pattern chris-sound-module.zip --pattern module.json --pattern SHA256SUMS
+          (cd verified-draft && sha256sum --check SHA256SUMS)
+          cmp dist/chris-sound-module.zip verified-draft/chris-sound-module.zip
+          cmp dist/module.json verified-draft/module.json
+          cmp dist/SHA256SUMS verified-draft/SHA256SUMS
+      - name: Publish the verified release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: Chrisrous/Chris-Sound-Module
+        run: gh release edit v2.0.0 --draft=false --latest
+      - name: Verify public downloads without authentication
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir verified-public
+          for asset in chris-sound-module.zip module.json SHA256SUMS; do
+            curl --fail --location --silent --show-error --retry 5 --retry-all-errors "https://github.com/Chrisrous/Chris-Sound-Module/releases/download/v2.0.0/$asset" --output "verified-public/$asset"
+            cmp "dist/$asset" "verified-public/$asset"
+          done
+          (cd verified-public && sha256sum --check SHA256SUMS)
+          printf 'Release v2.0.0 published and all three public assets verified. Main was not modified.\n' >> "$GITHUB_STEP_SUMMARY"

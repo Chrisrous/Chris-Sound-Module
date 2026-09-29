@@ -25,8 +25,8 @@ A new selection cannot relabel a previous Play report. Stop affects recipients, 
 entry. A gesture interrupted by a selection/recipient change is cancelled. A redraw alone is
 not a selection change. Working volume is session-local until explicitly saved.
 
-The source playlist, schema version 1, user settings and protocol 2 remain unchanged in RC6.
-No migration is necessary for RC2-RC5 data. Do not rename the technical module ID or settings keys.
+The source playlist, schema version 1, user settings and protocol 2 remain unchanged in 2.0.0.
+No migration is necessary for RC2-RC6 data. Do not rename the technical module ID or settings keys.
 
 ## Async and security boundaries
 

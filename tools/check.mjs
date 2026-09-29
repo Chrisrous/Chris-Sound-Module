@@ -3,6 +3,7 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { dirname, resolve, relative, isAbsolute, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { STATUS_VALUES } from "../scripts/status.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -25,7 +26,24 @@ assert.equal(manifest.id, "chris-sound-module");
 assert.equal(manifest.version, pkg.version);
 assert.equal(manifest.compatibility.minimum, "14");
 assert.equal(manifest.compatibility.maximum, "14");
-assert.equal(manifest.compatibility.verified, undefined, "RC must not claim live certification");
+if (/^\d+\.\d+\.\d+$/.test(manifest.version)) {
+    const approval = JSON.parse(read(".github/release-approval.json"));
+    assert.equal(approval.approved, true, "Stable releases require recorded owner acceptance");
+    assert.equal(approval.version, manifest.version);
+    assert.equal(approval.foundry_generation, "14");
+    assert.equal(manifest.compatibility.verified, approval.exact_foundry_build ?? approval.foundry_generation);
+    assert.match(approval.tested_commit, /^[a-f0-9]{40}$/);
+    assert.equal(manifest.manifest, "https://raw.githubusercontent.com/Chrisrous/Chris-Sound-Module/main/module.json");
+    assert.equal(manifest.download, `https://github.com/Chrisrous/Chris-Sound-Module/releases/download/v${manifest.version}/chris-sound-module.zip`);
+    const runtimeFiles = ["scripts", "templates", "css", "lang"].flatMap(files).sort();
+    assert.deepEqual(Object.keys(approval.runtime_sha256).sort(), runtimeFiles, "Accepted runtime inventory differs");
+    for (const path of runtimeFiles) {
+        const actual = createHash("sha256").update(readFileSync(resolve(root, path))).digest("hex");
+        assert.equal(actual, approval.runtime_sha256[path], `Accepted runtime changed: ${path}`);
+    }
+} else {
+    assert.equal(manifest.compatibility.verified, undefined, "Unaccepted candidates must not claim live certification");
+}
 assert.equal(manifest.socket, true);
 for (const path of [...manifest.esmodules, ...manifest.styles, ...manifest.languages.map(lang => lang.path)]) exactPath(resolve(root, path));
 const sources = files("scripts").filter(path => path.endsWith(".js"));
@@ -74,7 +92,10 @@ for (const path of ["README.md", "CONTRIBUTING.md", "SECURITY.md", "CHANGELOG.md
         exactPath(resolve(root, dirname(path), decodeURIComponent(target.split("#")[0])));
     }
 }
-const workflow = read(".github/workflows/test.yml");
-for (const [, ref] of workflow.matchAll(/uses:\s+[^\s@]+@([^\s]+)/g)) assert.match(ref, /^[a-f0-9]{40}$/, "Pin Actions by immutable commit SHA");
-console.log(`Static checks passed: ${sources.length} runtime modules, ${keys.size} EN/DE keys, imports, docs links, one slider and pinned CI actions.`);
-console.log("Template checks are structural, not live Foundry/Handlebars certification.");
+for (const path of files(".github/workflows").filter(path => /\.ya?ml$/.test(path))) {
+    for (const [, ref] of read(path).matchAll(/uses:\s+[^\s@]+@([^\s]+)/g)) {
+        assert.match(ref, /^[a-f0-9]{40}$/, "Pin Actions by immutable commit SHA");
+    }
+}
+console.log(`Static checks passed: ${sources.length} runtime modules, ${keys.size} EN/DE keys, imports, docs links, one slider, release acceptance and pinned CI actions.`);
+console.log("Template checks are structural. Live acceptance is the owner's reported test, not automated runtime certification.");

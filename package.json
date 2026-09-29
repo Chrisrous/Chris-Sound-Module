@@ -1,6 +1,6 @@
 {
   "name": "chris-sound-module",
-  "version": "2.0.0-rc.6",
+  "version": "2.0.0",
   "description": "Chris SoundPad for Foundry Virtual Tabletop v14",
   "private": true,
   "type": "module",

@@ -2,10 +2,18 @@
 
 ## Installation and opening
 
-Use a backed-up v14 test world. Stop Foundry and replace only
-`Data/modules/chris-sound-module` with the directory from the module ZIP. Restart and reload
-all GM/player browsers. Confirm the version in Module Management. Do not nest the module twice.
-Keep the world data: pads and groups are stored there, not in the module directory.
+Back up the world and module directory. In Foundry Setup, use Add-on Modules > Install Module
+with this manifest URL, or Update for an existing installation using the same address:
+
+```text
+https://raw.githubusercontent.com/Chrisrous/Chris-Sound-Module/main/module.json
+```
+
+For manual installation, stop Foundry and replace only `Data/modules/chris-sound-module`
+with the directory from the release ZIP. Restart and reload all GM/player browsers.
+Confirm version 2.0.0 in Module Management. Do not nest the module twice.
+RC2-RC6 pads, groups and preferences need no migration. Keep world data intact.
+An RC without an update URL may need this one manual update. Foundry v14 is required.
 
 Open the GM-only window with the left headphones control, the right Playlists button or
 Settings. All entry points reveal the same window, including when minimized.
@@ -62,6 +70,6 @@ report separately. Requested level is not a measurement of physical loudness.
 ## Troubleshooting
 
 Check recipient selection, network connection, file availability and local mute/channel level.
-Click in the player browser to unlock audio. Run all browsers on the same module candidate.
+Click in the player browser to unlock audio. Run all browsers on the same module version.
 If a problem persists, include exact Foundry build, system, browser, module version, reproduction
 steps and redacted console errors in an issue. Do not publish signed audio URLs or world data.

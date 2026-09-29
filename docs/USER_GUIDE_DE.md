@@ -2,10 +2,20 @@
 
 ## Installation
 
+Für die Installation im Foundry-Startbildschirm unter **Zusatzmodule > Modul installieren**
+diese Manifest-Adresse einfügen. Bei vorhandener Installation mit dieser Adresse genügt
+die Update-Funktion. Foundry v14 ist erforderlich.
+
+```text
+https://raw.githubusercontent.com/Chrisrous/Chris-Sound-Module/main/module.json
+```
+
+**Manuelle Alternative oder Umstieg von einer Testversion ohne Update-Adresse:**
+
 Sichere Welt und Modulordner. Beende Foundry und ersetze nur den Ordner
 `Data/modules/chris-sound-module` durch den gleichnamigen Ordner aus der ZIP. Starte Foundry
-neu und lade alle verbundenen Browser neu. Prüfe die Modulversion in der Modulverwaltung.
-Gespeicherte Pads und Gruppen aus RC2 bis RC5 bleiben erhalten. Die Weltdateien nicht löschen.
+neu und lade alle verbundenen Browser neu. Prüfe in der Modulverwaltung die Version 2.0.0.
+Gespeicherte Pads und Gruppen aus RC2 bis RC6 bleiben erhalten. Die Weltdateien nicht löschen.
 
 Als Spielleiter öffnest du das Fenster über den Kopfhörer links, den Playlist-Button rechts
 oder die Moduleinstellungen. Alle Zugänge verwenden dasselbe Fenster.
