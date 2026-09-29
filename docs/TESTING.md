@@ -1,77 +1,71 @@
-# Testing and release gate
+# Testing and releases
 
 ## Automated checks
+
+Node.js 22+ and Python 3 are required.
 
 ```sh
 npm run validate
 npm run package
 ```
 
-Node.js 22+ and Python 3 are enough. Test discovery is explicit and does not depend on shell
-globs. Static checks cover syntax, case-sensitive imports, manifest assets, locale keys,
-template block/action wiring, the one-slider contract, current documentation links and pinned
-CI actions. Package verification byte-compares every included file and checks ZIP integrity.
+`validate` runs JavaScript syntax and import checks, localization and template checks,
+unit tests and Python packaging tests. `package` builds the installation ZIP and checksum.
+Run packaging tests separately with `npm run test:package`.
 
-Tests cover core playback/persistence, launchers, recipients, playback scopes, transport,
-prepared volume and release metadata. They use API/DOM doubles and simulated client delivery.
-A native-browser harness does not establish actual Foundry/Handlebars or WebAudio behavior.
-Do not describe these automated checks as actual multi-client Foundry tests.
+Tests cover playback, cancellation, storage, launchers, recipients, volume controls, transport
+and release metadata. Unit tests use API/DOM doubles and an in-process message relay.
+Browser tests with a simulated Foundry environment do not cover actual Foundry rendering,
+audio devices or networked GM/player sessions.
 
-## Owner acceptance of 2.0.0
+## Foundry regression checklist
 
-On 2026-09-29 the repository owner reported successful RC6 testing and explicitly approved
-publication. Accepted candidate commit: `34063940bf4a3468693c453d071af1cddfbdfdbd`.
-This is owner-reported acceptance, not an assistant-run Foundry test. The exact Foundry build,
-game-system version, browser version and individual case results were not supplied.
-The manifest therefore records verified generation **14**, not a fabricated exact build.
+Use a backed-up world with one GM and two separate player sessions. Record the Foundry build,
+game system, browsers and active modules with the results.
 
-The acceptance record and runtime SHA-256 inventory are in `.github/release-approval.json`.
-Static validation checks the approved inventory. The publication workflow additionally compares
-all runtime directories against the exact accepted commit. Metadata and documentation may differ.
+- [ ] Both opening buttons, settings and macros work without import or template errors.
+- [ ] Pads, groups and defaults survive an upgrade and browser restart.
+- [ ] There is one volume slider, including while editing a sound.
+- [ ] A plays for player 1. Selecting B and adjusting the slider leaves A unchanged.
+- [ ] Play and Preview use the prepared value. Apply affects only the displayed recipients.
+- [ ] Save default changes only the selected pad entry, not current audio or the source playlist.
+- [ ] Editor Save/Cancel does not overwrite an explicitly saved volume default.
+- [ ] Checkbox, label and Space selection preserve focus, other recipients and unsaved edits.
+- [ ] Changing recipients during a slider gesture cancels the gesture without retargeting it.
+- [ ] Recipient Stop, Preview Stop and Emergency Stop retain their separate scopes.
+- [ ] Loading, blocked audio, missing files, offline recipients, multiple tabs and mute behave correctly.
+- [ ] Both languages and small windows remain usable with the installed interface modules.
 
-## Real-world regression checklist
+## Release configuration
 
-Record the exact Foundry build, game system, browsers, module versions and results for future
-changes. Use a backed-up world, a GM and two distinct player sessions. The retained checklist
-is not marked with invented individual results for the owner's aggregate acceptance.
-
-- [ ] Installation and opening from both launchers, settings and macro without errors.
-- [ ] Existing pads/groups/defaults survive upgrades and browser restarts.
-- [ ] Exactly one volume slider, including with Sound edit open.
-- [ ] A plays for player 1. Selecting B and moving the slider leaves A unchanged and labelled A.
-- [ ] Play/Preview use the prepared level. Apply affects only the displayed recipients.
-- [ ] Save default affects the selected pad entry, not running audio or the source playlist.
-- [ ] Editor Save/Cancel does not override an explicitly saved volume default.
-- [ ] Mouse, label and Space recipient changes retain focus and other selections.
-- [ ] Changed recipients during a slider gesture cancel it without silent retargeting.
-- [ ] Recipient Stop, Preview Stop and Emergency Stop have distinct documented scopes.
-- [ ] Loading/unlock, missing files, offline users, multiple tabs, partial groups and mute.
-- [ ] Both languages, normal/small windows and the supported UI themes remain usable.
+`.github/release-approval.json` contains the release switch, compatibility settings, baseline
+commit and runtime SHA-256 inventory. Static checks require the configured version and hashes
+to match. The publishing workflow also compares all runtime directories against the baseline
+commit. Documentation and package metadata are checked separately.
 
 ## Packaging and publishing
 
-`tools/package.py` allowlists documentation and runtime directories. It excludes tests, tools,
-archive notes and generated logs. Repeated builds with the same source/toolchain are reproducible.
-Normal PR/main validation remains read-only and retains a temporary ZIP/checksum build artifact.
+`tools/package.py` includes runtime files and selected documentation. Tests, tools, historical
+notes and generated logs are excluded. Fixed ZIP metadata makes repeated builds reproducible
+with the same source and toolchain. Packaging tests compare every included file with its source
+and check internal documentation links.
 
-The separate `Publish Chris SoundPad 2.0.0` workflow only runs on `release/2.0.0`, by a push or
-manual dispatch on that exact branch in this repository. It first runs full validation on
-Linux and Windows. Only the publication job receives repository `contents: write` permission.
+The version-specific publishing workflow runs on `release/2.0.0`. It validates Linux and Windows,
+then builds `chris-sound-module.zip`, `module.json` and `SHA256SUMS`. Only the publishing job has
+`contents: write` permission. Normal PR/main CI is read-only.
 
-The publication job builds `chris-sound-module.zip`, `module.json` and `SHA256SUMS`, creates a
-draft release at the workflow commit, and uploads these assets. It downloads and byte-compares
-them with the validated build before publishing. After publication it repeats the downloads
-without authentication and verifies bytes and checksums. Existing releases are never clobbered.
-The workflow does not merge PRs, change branch protections or move `main`.
+Assets are uploaded to a draft release, downloaded and byte-compared before publication. Public
+downloads are checked again without authentication. The workflow does not merge PRs, move main,
+change branch protection or overwrite existing releases.
 
-Promotion sequence: finalize the accepted metadata, pass PR validation, create the explicit
-release branch at that commit, and verify publication and public assets. Only then merge the PR
-to expose the matching stable main manifest. A version-pinned manifest asset is also provided.
-If a draft was left by an interrupted publication, inspect it before retrying. The workflow
-intentionally refuses to overwrite an existing release rather than guessing whether it is safe.
+Publish and verify the assets before merging the matching installation manifest into main.
+Inspect an interrupted draft before retrying. Never reuse a version tag for changed package bytes.
 
-The existing v1.1.0 release is retained. Version 2.0.0 requires Foundry generation 14.
-RC2-RC6 stored pads, groups and preferences require no conversion. Reload all clients on upgrade.
-For rollback, restore the previous module directory and reload clients. Keep world backups.
+Release-description updates are separate from package publishing. They change only the release
+body and verify that the tag, target commit and asset checksums remain unchanged.
 
-Packaging regressions also run separately with `npm run test:package` (Python unittest).
+## Upgrade and rollback
+
+Version 2.0.0 requires Foundry v14. Stored data from RC2 through RC6 needs no conversion.
+Reload all clients after upgrading. To roll back, restore the previous module directory and
+reload clients. Keep world backups.

@@ -1,0 +1,88 @@
+name: Update release description
+
+on:
+  push:
+    branches: [maintenance/project-texts]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chris-soundpad-release-description
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: github.repository == 'Chrisrous/Chris-Sound-Module' && github.ref == 'refs/heads/maintenance/project-texts'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - run: npm run validate
+
+  description:
+    needs: validate
+    if: github.repository == 'Chrisrous/Chris-Sound-Module' && github.ref == 'refs/heads/maintenance/project-texts'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Update text and verify unchanged release assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import subprocess
+          from pathlib import Path
+
+          endpoint = 'repos/Chrisrous/Chris-Sound-Module/releases/399081593'
+          tag_endpoint = 'repos/Chrisrous/Chris-Sound-Module/git/ref/tags/v2.0.0'
+          body = Path('docs/RELEASE_NOTES_2.0.0.md').read_text(encoding='utf-8')
+          if not body.startswith('# Chris SoundPad 2.0.0\n') or len(body) > 20000:
+              raise RuntimeError('Unexpected release description')
+
+          def api(path, payload=None):
+              args = ['gh', 'api', '--hostname', 'github.com', path]
+              if payload is not None:
+                  args.extend(['--method', 'PATCH', '--input', '-'])
+              result = subprocess.run(args, input=payload, text=True, capture_output=True, check=True)
+              return json.loads(result.stdout)
+
+          def identity(release):
+              fields = ('id', 'tag_name', 'target_commitish', 'name', 'draft', 'prerelease', 'published_at')
+              assets = sorted((a['id'], a['name'], a['size'], a.get('digest'),
+                               a['browser_download_url'], a['state']) for a in release['assets'])
+              return {k: release[k] for k in fields}, assets
+
+          before = api(endpoint)
+          tag_before = api(tag_endpoint)
+          if before['tag_name'] != 'v2.0.0' or before['draft'] or before['prerelease']:
+              raise RuntimeError('Expected the published v2.0.0 release')
+          if before['target_commitish'] != '9e0dbe992d91b8130950adf8f2579d3622bb8594':
+              raise RuntimeError('Release target changed')
+          if tag_before['object']['sha'] != before['target_commitish']:
+              raise RuntimeError('Tag and release target differ')
+          if {a['name'] for a in before['assets']} != {'chris-sound-module.zip', 'module.json', 'SHA256SUMS'}:
+              raise RuntimeError('Release asset inventory changed')
+          api(endpoint, json.dumps({'body': body}))
+          after = api(endpoint)
+          if after['body'] != body or identity(after) != identity(before):
+              raise RuntimeError('Release verification failed')
+          if api(tag_endpoint)['object'] != tag_before['object']:
+              raise RuntimeError('Release tag changed')
+          print('Release description updated. Version, tag, commit and assets are unchanged.')
+          PY

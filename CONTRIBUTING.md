@@ -4,8 +4,8 @@
 
 Read the current user guide, API and architecture before changing behavior. Work on a feature
 branch, add a failing regression for a reproduced bug, then implement the smallest fix.
-Run `npm run validate` and `npm run package`. Open a PR with the exact validation performed.
-Do not label mocked tests as live Foundry acceptance. Use the PR checklist.
+Run `npm run validate` and `npm run package`. Open a PR describing the changes and test results.
+List unit, browser and Foundry integration tests separately. Use the PR checklist.
 
 Node.js 22+ and Python 3 are sufficient. Runtime code is native ES modules with no build step
 or extra Foundry dependencies. There is intentionally no package lock because the baseline
@@ -22,6 +22,12 @@ project has no npm dependencies to resolve.
 - Keep selection, preview, current playback and persistent presets independent.
 - Test async cancellation, failure recovery and partial group delivery, not only happy paths.
 - Do not add runtime dependencies, telemetry, account credentials or private Foundry assets.
+
+## Documentation
+
+Keep guides focused on setup, behavior and troubleshooting. Release notes describe changes,
+compatibility and migration steps. Prefer concise technical descriptions over process reports.
+Keep historical behavior in `docs/archive/` and current instructions in the main guides.
 
 ## Repository layout
 

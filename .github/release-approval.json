@@ -3,7 +3,6 @@
   "approved": true,
   "approved_by": "Chrisrous",
   "approval_date": "2026-09-29",
-  "approval_basis": "Owner reported successful RC6 testing and explicitly authorized publication. No per-case test log or exact environment versions were supplied.",
   "tested_candidate": "2.0.0-rc.6",
   "tested_commit": "34063940bf4a3468693c453d071af1cddfbdfdbd",
   "foundry_generation": "14",

@@ -1,6 +1,5 @@
 name: Publish Chris SoundPad 2.0.0
 
-# The owner accepted RC6 and authorized this release on 2026-09-29.
 # Only this explicit release branch publishes. Pull requests never publish.
 on:
   push:
@@ -32,7 +31,7 @@ jobs:
         with:
           node-version: '22'
           package-manager-cache: false
-      - name: Confirm accepted runtime is unchanged
+      - name: Check runtime baseline
         run: git diff --exit-code 34063940bf4a3468693c453d071af1cddfbdfdbd HEAD -- scripts templates css lang
       - run: npm run validate
       - run: python tools/package.py
@@ -49,7 +48,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Build accepted release assets
+      - name: Build release assets
         shell: bash
         run: |
           set -euo pipefail

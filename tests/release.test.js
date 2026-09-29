@@ -25,7 +25,7 @@ test("stable release metadata uses the original module identity and matching ver
     assert.equal(manifest.download, `https://github.com/Chrisrous/Chris-Sound-Module/releases/download/v${manifest.version}/chris-sound-module.zip`);
 });
 
-test("stable verification is no more specific than the recorded owner acceptance", options, () => {
+test("stable compatibility matches the release configuration", options, () => {
     const approval = JSON.parse(read(".github/release-approval.json"));
     assert.equal(approval.approved, true);
     assert.equal(approval.version, manifest.version);
@@ -34,7 +34,7 @@ test("stable verification is no more specific than the recorded owner acceptance
     assert.match(approval.tested_commit, /^[a-f0-9]{40}$/);
 });
 
-test("stable runtime inventory exactly matches the accepted candidate", options, () => {
+test("stable runtime inventory exactly matches the release baseline", options, () => {
     const expected = JSON.parse(read(".github/release-approval.json")).runtime_sha256;
     const actual = ["scripts", "templates", "css", "lang"].flatMap(inventory).sort();
     assert.deepEqual(actual, Object.keys(expected).sort());

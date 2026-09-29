@@ -2,18 +2,28 @@
 
 Stable versions have public GitHub releases. Historical candidate records remain in `docs/archive/`.
 
+## Unreleased
+
+### Documentation
+- Simplify project guides, historical notes and release descriptions.
+- Keep documentation focused on features, usage, compatibility and technical limitations.
+
 ## 2.0.0 - 2026-09-29
 
-### Released
-- First stable Foundry v14 release, promoted after owner-reported successful RC6 testing.
-- Includes the v14 API migration, all nine core improvements, both launchers, recipient fixes,
-  one-volume-control interface and repository cleanup documented below.
-- No runtime, template, CSS or localization changes from the tested 2.0.0-rc.6 candidate.
-- Restore the original stable manifest URL and a versioned release ZIP download.
-- Add an owner-authorized, release-branch-only workflow with Linux/Windows validation,
-  draft-asset verification and anonymous public-download verification. Normal CI stays read-only.
-- Keep technical ID, stored schema 1, settings and socket protocol 2 unchanged.
-- Foundry generation 14 is owner-confirmed. Exact build/system/browser versions were not supplied.
+### Features
+- Native Foundry v14 application and audio APIs.
+- Persistent pads and recipient groups, local preview, playback feedback and fade presets.
+- Left-toolbar and Playlists launchers with a shared window.
+- A single volume control with separate Apply and Save default actions.
+- Recipient selection that preserves keyboard focus and unsaved edits.
+- English/German guides, organized source files and Linux/Windows CI.
+
+### Compatibility and distribution
+- Foundry v14 only. Version 1.1.0 remains available for v12.
+- Runtime scripts, templates, styles and translations are unchanged from RC6.
+- Stable installation manifest, versioned ZIP and SHA-256 checksums.
+- Release-branch publishing with draft-asset and public-download verification.
+- Technical module ID, schema 1, settings keys and protocol 2 remain unchanged.
 
 ## 2.0.0-rc.6
 

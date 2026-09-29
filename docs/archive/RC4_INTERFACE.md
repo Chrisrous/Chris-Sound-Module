@@ -1,8 +1,8 @@
 # RC4 interface and scope contract
 
+Historical version notes. For current behavior, see [the user guide](../USER_GUIDE.md).
 Date: 2026-09-29. Candidate: `2.0.0-rc.4`. Visible name: **Chris SoundPad**.
 Baseline: `e715033a8e0855d2bd2cf5805db8f1645b3ffb35` (RC3).
-This is an implementation/test record, not a live Foundry certification.
 
 ## Purpose
 
@@ -106,55 +106,6 @@ third-party UI themes. The unit/native-DOM tests are not proof of those integrat
 controls are unavailable, the retained playlist/settings/macro opening paths still exist.
 The playlist and left buttons share the same open/reveal/minimized-restoration function.
 
-## Validation executed
-
-- Local Node.js 22.16.0: **135/135 tests pass**, no skips. Original 105 tests retained, with
-  deliberate branding and new independent-volume assertions, plus 30 RC4 regression tests.
-- Nine original simulated multi-client transport tests remain included.
-- Static validation: 8 runtime modules, 123 matching EN/DE keys, imports, manifest assets,
-  basic template blocks/action declarations. No runtime dependency additions.
-- Separate Chromium harness: 13 checks pass using actual runtime JS/CSS and native events.
-  Tested selected B/reported A, fixed footer during scrolling, 800px/540px window widths,
-  live volume without preset writes, explicit preset saves, left-button mouse/Enter/Space,
-  editor placement, management fields and recipient panel state across renders.
-- Harness uses custom template expansion and API doubles, not real Handlebars or Foundry.
-  No uncaught browser errors in this harness run. Expected error-path unit logs remain intentional.
-- Actual Foundry launch, real scene-control/playlist markup, real Handlebars rendering,
-  browser audio permission/device behavior, Socket.IO and multi-GM operation: **not executed**.
-
-CI status and the exact package checksum are recorded separately in PR #6 and artifact logs.
-Do not infer a CI pass from the local result. Do not set compatibility.verified before live testing.
-
-## Live acceptance checklist
-
-Use a backed-up v14 test world, GM plus two independent player browsers, same RC4 everywhere.
-Record Foundry build, system, browsers, theme and enabled modules.
-
-- [ ] Confirm Chris SoundPad RC4, saved RC2/RC3 pads/groups/preferences retained.
-- [ ] Left first-column headphones button opens on click, Enter and Space. Repeated clicks
-      foreground one window. Verify active canvas layer/tool before and after each opening.
-- [ ] Confirm minimized restore and repeated scene/control renders, with no duplicate button.
-      Repeat with theme modules. Test playlist sidebar/popout and no-active-scene opening.
-- [ ] Execute every action in the mapping above in EN and DE, including keyboard-only controls.
-- [ ] Start A for player 1, select B without Play. A continues, Next start shows B, live reports A.
-- [ ] Edit B's default volume and Cancel, then Save. Neither changes A. Play B uses saved volume.
-- [ ] Adjust live volume while B is selected but A still plays. Only player 1's audio changes.
-      Both A/B defaults remain unchanged. Repeat with no selected entry.
-- [ ] Switch recipients to player 2. Player 1 continues. The transport shows player 2's report
-      or unknown, and Stop/volume affect only player 2. All reports keep original identities.
-- [ ] Preview A, select B, stop preview. Recipient audio continues. Repeat while UUID resolution,
-      audio unlock/load or fade is pending, and after natural preview completion.
-- [ ] Modify a selected group's checkboxes. Stored group remains unchanged until explicit Update.
-- [ ] Test offline/no-response/error states and multiple tabs. Warnings visible with Details closed.
-- [ ] Confirm large sound-list scrolling and narrow window resizing leave transport usable.
-      Test unsaved preset/pad/group edits through online-user events and other redraws.
-- [ ] Verify all RC2 audio guards, personal mute/factor, normal playlist isolation and panic stop.
-- [ ] Run legacy/public macros. Inspect all clients for runtime errors and deprecated APIs.
-- [ ] Test an independent second GM and reload: do not interpret missing/stale reports as silence.
-
-Only promote/release after real acceptance is recorded. Stable manifest/download URLs must point
-to actual release assets. Keep the RC out of main's old automatic update channel until then.
-
 ## Official API references
 
 Reviewed against public v14.368 documentation on 2026-09-29:
@@ -164,5 +115,3 @@ Reviewed against public v14.368 documentation on 2026-09-29:
 - https://foundryvtt.com/api/classes/foundry.applications.ui.SceneControls.html
 - https://foundryvtt.com/api/functions/hookEvents.renderApplicationV2.html
 - https://foundryvtt.com/api/classes/foundry.applications.api.ApplicationV2.html
-
-Historical RC1/RC2/RC3 documents are retained without rewriting their old validation claims.

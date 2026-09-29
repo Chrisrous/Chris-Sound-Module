@@ -13,5 +13,5 @@ Same-user concurrent pad editing has best-effort revision checks, not atomic ser
 Emergency Stop cannot reach disconnected clients. Back up worlds before trying candidates.
 
 For a suspected vulnerability, prefer GitHub private vulnerability reporting when enabled.
-Otherwise contact the repository owner without posting exploit details or credentials publicly.
-No security response SLA or hostile-client resistance is promised.
+Do not post credentials, private world data or exploit details in public issues.
+There is no guaranteed response time.
