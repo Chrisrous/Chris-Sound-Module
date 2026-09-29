@@ -391,16 +391,18 @@ test("entry registers user-scoped persistence/preferences and exposes old/new AP
   await globalThis.playSoundForPlayer("Player", "Weather", "Thunder"); assert.equal(env.emitted.length, 1);
 });
 
-test("native live slider sends once on release without rewriting the selected preset", async () => {
+test("single slider prepares a value, then Apply sends once without rewriting the preset", async () => {
   const pad = new SoundPad(); await pad._onDrop(drop({ type: "PlaylistSound", uuid: env.sound.uuid }));
   pad.selectedSoundId = pad.pad.sounds[0].id; pad.targetIds = ["player"];
   const root = fakeNode(), dropArea = fakeNode(), label = fakeNode();
   root.querySelector = selector => selector === ".soundpad-drop-area" ? dropArea : label;
-  pad.element = { querySelector: selector => selector === ".chris-sound-soundpad" ? root : null, querySelectorAll: () => [] };
+  pad.element = { querySelector: selector => selector === ".chris-sound-soundpad" ? root : selector === ".volume-value" ? label : null, querySelectorAll: () => [] };
   await pad._onRender({}, {});
-  const event = { target: { dataset: { field: "liveVolume" }, value: "0.25" } };
+  const event = { target: { dataset: { field: "volume" }, value: "0.25" } };
   root.listeners.input(event); assert.equal(label.textContent, "25%"); assert.equal(env.emitted.length, 0);
   root.listeners.change(event); await tick();
+  assert.equal(env.emitted.length, 0);
+  await pad.dispatch("applyVolume");
   assert.equal(env.emitted.length, 1); assert.equal(env.emitted[0].data.volume, 0.125);
   assert.equal(library.read().pads[0].sounds[0].volume, 0.4);
   const over = { preventDefault() { this.prevented = true; }, dataTransfer: {} };

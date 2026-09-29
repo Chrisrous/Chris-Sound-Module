@@ -73,7 +73,7 @@
       <p class="csm-unsaved" {{#unless selectedDirty}}hidden{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.UnsavedPreset"}}</p>
       <label>{{localize "CHRIS_SOUND_MODULE.UI.Alias"}}<input data-field="alias" type="text" maxlength="120" value="{{selected.alias}}"></label>
       <label>{{localize "CHRIS_SOUND_MODULE.UI.Category"}}<input data-field="category" type="text" maxlength="60" value="{{selected.category}}"></label>
-      <label>{{localize "CHRIS_SOUND_MODULE.UI.DefaultVolume"}} <span class="preset-volume-value">{{selected.percent}}%</span><input type="range" data-field="presetVolume" min="0" max="1" step="0.01" value="{{selected.slider}}"></label>
+
       <label>{{localize "CHRIS_SOUND_MODULE.UI.Repeat"}}<select data-field="repeat"><option value="inherit" {{#if selected.loopDefault}}selected{{/if}}>{{localize "CHRIS_SOUND_MODULE.UI.FromPlaylist"}}</option><option value="yes" {{#if selected.loopYes}}selected{{/if}}>{{localize "CHRIS_SOUND_MODULE.UI.Yes"}}</option><option value="no" {{#if selected.loopNo}}selected{{/if}}>{{localize "CHRIS_SOUND_MODULE.UI.No"}}</option></select></label>
       <div class="csm-row"><label>{{localize "CHRIS_SOUND_MODULE.UI.FadeIn"}}<input data-field="fadeIn" type="number" min="0" max="30" step="0.1" value="{{selected.fadeInSeconds}}"></label><label>{{localize "CHRIS_SOUND_MODULE.UI.FadeOut"}}<input data-field="fadeOut" type="number" min="0" max="30" step="0.1" value="{{selected.fadeOutSeconds}}"></label></div>
       <div class="csm-row"><button type="button" data-action="savePreset">{{localize "CHRIS_SOUND_MODULE.UI.SavePreset"}}</button><button type="button" data-action="cancelEdit">{{localize "CHRIS_SOUND_MODULE.UI.Cancel"}}</button></div>
@@ -83,7 +83,7 @@
 
   <footer class="csm-transport">
     <div class="csm-next">
-      <div><span class="csm-kicker">{{localize "CHRIS_SOUND_MODULE.UI.NextStart"}}</span> <strong>{{savedLabel}}</strong>{{#if selected}} · {{savedPercent}}%{{/if}}</div>
+      <div><span class="csm-kicker">{{localize "CHRIS_SOUND_MODULE.UI.NextStart"}}</span> <strong>{{savedLabel}}</strong></div>
       <div class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.StartRecipients"}}: <span class="csm-target-summary">{{targetSummary}}</span></div>
       <div class="csm-row">
         <button class="csm-primary" type="button" data-action="playSound" {{#unless canPlay}}disabled{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.Play"}}</button>
@@ -91,16 +91,22 @@
         <button type="button" data-action="editSound" {{#unless selected}}disabled{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.EditSound"}}</button>
       </div>
       <div class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.PreviewStatus"}} <span class="preview-status"></span></div>
+    <section class="csm-volume" aria-label="{{localize 'CHRIS_SOUND_MODULE.UI.Volume'}}">
+      <label for="csm-volume">{{localize "CHRIS_SOUND_MODULE.UI.Volume"}} <output class="volume-value" for="csm-volume">{{volumePercent}}%</output></label>
+      <input id="csm-volume" type="range" data-field="volume" min="0" max="1" step="0.01" value="{{volumeInput}}" aria-describedby="csm-volume-hint">
+      <p id="csm-volume-hint" class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.VolumeHint"}}</p>
+      <div class="csm-row">
+        <button type="button" data-action="applyVolume" {{#unless hasTargets}}disabled{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.ApplyVolume"}}</button>
+        <button type="button" data-action="saveVolume" {{#unless selected}}disabled{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.SaveVolume"}}</button>
+      </div>
+      <p class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.ApplyRecipients"}}: <span class="csm-target-summary">{{targetSummary}}</span></p>
+    </section>
     </div>
     <div class="csm-live">
       <strong>{{localize "CHRIS_SOUND_MODULE.UI.LiveScope"}}</strong>
       <div class="csm-live-targets">{{localize "CHRIS_SOUND_MODULE.UI.ControlRecipients"}}: <span class="csm-target-summary">{{targetSummary}}</span></div>
       <div class="csm-live-reports" aria-live="polite"></div>
-      <div class="csm-row csm-live-controls">
-        <label class="csm-grow">{{localize "CHRIS_SOUND_MODULE.UI.LiveVolume"}}: <span class="volume-value">{{livePercent}}%</span><input type="range" data-field="liveVolume" min="0" max="1" step="0.01" value="{{liveVolume}}" {{#unless hasTargets}}disabled{{/unless}}></label>
-        <button type="button" data-action="stopSound" {{#unless hasTargets}}disabled{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.StopTargets"}}</button>
-      </div>
-      <p class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.LiveHint"}}</p>
+      <button type="button" data-action="stopSound" {{#unless hasTargets}}disabled{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.StopTargets"}}</button>
     </div>
     <div class="csm-status-warnings" role="status" hidden></div>
     <div class="csm-bottom-row">

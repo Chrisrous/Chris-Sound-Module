@@ -28,38 +28,39 @@ beforeEach(async () => {
   tracker = new StatusTracker();
 });
 afterEach(async()=>{tracker.clear();getService().tracker.listeners.clear();await getService().dispose();});
-test("selecting B does not send a command, rewrite A's report, or change the live slider",async()=>{
+test("selecting B does not send a command, rewrite A's report, or change A's volume",async()=>{
   await getService().play("player",first.uuid,{label:"Thunder"});
-  pad.liveVolume=.3;
   await pad.dispatch("selectSound",{dataset:{id:second.id}});
   assert.equal(env.emitted.length,1); assert.equal(getService().tracker.rows()[0].label,"Thunder");
-  assert.equal(pad.liveVolume,.3); assert.equal((await pad._prepareContext({})).savedLabel,"Rain");
+  assert.equal(getService().tracker.rows()[0].volume,.4);
+  assert.equal((await pad._prepareContext({})).savedLabel,"Rain");
+  assert.ok(Math.abs(pad.volumeControl.gain - .15) < 1e-12);
 });
-test("live volume with B selected changes recipient audio only, not either sound preset",async()=>{
+test("explicit volume with B selected changes recipient audio only, not either sound preset",async()=>{
   await pad.dispatch("selectSound",{dataset:{id:second.id}});
-  const before=library.read(); await pad.onChange(change("liveVolume","0.3"));
+  const before=library.read(); await pad.onChange(change("volume","0.3")); await pad.dispatch("applyVolume");
   assert.deepEqual(library.read(),before);
   assert.equal(env.emitted.at(-1).data.action,"changeVolume");assert.equal(env.emitted.at(-1).data.userId,"player");
   assert.equal(env.emitted.at(-1).data.volume,.3**1.5);
 });
 test("runtime volume works with no selected sound",async()=>{
-  pad.selectedSoundId=null;await pad.onChange(change("liveVolume","0"));
+  pad.selectedSoundId=null;await pad.onChange(change("volume","0"));await pad.dispatch("applyVolume");
   assert.equal(env.emitted.at(-1).data.volume,0);
 });
-test("saving preset volume changes future starts only",async()=>{
-  pad.field=name=>({alias:{value:"Alias"},category:{value:"Weather"},repeat:{value:"no"},fadeIn:{value:"1"},fadeOut:{value:"2"},presetVolume:{value:"0.5"}}[name]);
-  await pad.dispatch("savePreset"); assert.equal(env.emitted.length,0);
-  assert.equal(pad.selected.volume,.5**1.5);assert.equal(pad.selected.loop,false);
+test("saving volume changes future starts only",async()=>{
+  pad.volumeControl.select(pad.selected); pad.volumeControl.setInput(.5);
+  await pad.dispatch("saveVolume"); assert.equal(env.emitted.length,0);
+  assert.equal(pad.selected.volume,.5**1.5); assert.equal(pad.selected.loop,null);
 });
-test("preset volume remains a draft until Save and Cancel discards it",async()=>{
-  const before=library.read();pad.captureDraft(change("presetVolume","0.1").target);
+test("volume remains unsaved until the explicit Save default action",async()=>{
+  const before=library.read();await pad._prepareContext({}); await pad.onChange(change("volume","0.1"));
   assert.deepEqual(library.read(),before);assert.equal(env.emitted.length,0);
-  assert.equal((await pad._prepareContext({})).savedPercent,Math.round(.4**(1/1.5)*100));
-  await pad.dispatch("cancelEdit");assert.equal(pad.drafts.size,0);
+  await pad.dispatch("cancelEdit");assert.equal(pad.drafts.size,0);assert.deepEqual(library.read(),before);
 });
-test("Play uses saved preset while a different draft is open",async()=>{
-  pad.captureDraft(change("alias","DRAFT").target);pad.captureDraft(change("presetVolume","0.1").target);
-  await pad.dispatch("playSound");assert.equal(env.emitted.at(-1).data.data.volume,.4);
+test("Play uses the common level but ignores an unsaved alias draft",async()=>{
+  await pad._prepareContext({});pad.captureDraft(change("alias","DRAFT").target);
+  await pad.onChange(change("volume","0.1"));
+  await pad.dispatch("playSound");assert.equal(env.emitted.at(-1).data.data.volume,.1**1.5);
   assert.equal(getService().tracker.rows()[0].label,"Thunder");
 });
 test("stop has recipient scope even when selected B never played",async()=>{
@@ -73,15 +74,15 @@ test("selection of another target does not rename old reports or stop old recipi
   assert.match(nodes[".recipient-status"].children[0].textContent,/Player: Thunder/);
   await pad.dispatch("stopSound");assert.equal(env.emitted.at(-1).data.userId,"other");
 });
-test("live gesture aborts rather than routing to a changed recipient selection",async()=>{
-  const target=change("liveVolume","0.1").target;pad.volumeGestures.set(target,pad.targetRevision);pad.targetRevision++;
-  await assert.rejects(pad.onChange({target}),/TargetsChanged/);assert.equal(env.emitted.length,0);
+test("gesture aborts rather than accepting a changed recipient scope",async()=>{
+  const target=change("volume","0.1").target;pad.beginVolumeGesture(target);pad.targetRevision++;
+  await assert.rejects(pad.onChange({target}),/VolumeContextChanged/);assert.equal(env.emitted.length,0);
 });
-test("invalid live volume does not emit",async()=>{
-  for(const v of ["NaN","Infinity","-1","2"])await assert.rejects(pad.onChange(change("liveVolume",v)));
+test("invalid volume does not emit",async()=>{
+  for(const v of ["NaN","Infinity","-1","2"])await assert.rejects(pad.onChange(change("volume",v)));
   assert.equal(env.emitted.length,0);
 });
-test("empty target selection cannot send live volume",async()=>{pad.targetIds=[];await assert.rejects(pad.onChange(change("liveVolume",".4")));assert.equal(env.emitted.length,0);});
+test("empty target selection cannot Apply volume",async()=>{pad.targetIds=[];await pad.onChange(change("volume",".4"));await assert.rejects(pad.dispatch("applyVolume"));assert.equal(env.emitted.length,0);});
 test("preview identity survives selection change and stops separately",async()=>{
   await pad.dispatch("preview");await pad.dispatch("selectSound",{dataset:{id:second.id}});
   assert.equal(getService().previewLabel,"Thunder");assert.equal(env.emitted.length,0);
@@ -101,7 +102,7 @@ test("failed preview resolution releases pending toggle state",async()=>{
 });
 test("removing the selected entry does not stop existing audio",async()=>{
   await getService().play("gm",first.uuid);await pad.dispatch("removeSound",{dataset:{id:first.id}});
-  assert.equal(getService().playback.current.sound.playing,true);assert.equal(pad.selected,null ?? undefined);
+  assert.equal(getService().playback.current.sound.playing,true);assert.equal(pad.selected,undefined);
 });
 test("modified group becomes individual selection without overwriting saved group",async()=>{
   await pad.mutate(d=>d.groups.push({id:"g",name:"Party",userIds:["player"]}));pad.groupId="g";
@@ -138,9 +139,11 @@ test("all original 18 actions are still registered and have an accessible UI rou
     assert.ok(template.includes(`data-action="${action}"`)||["preview","stopPreview"].includes(action)&&template.includes('data-action="togglePreview"'),action);
   }
 });
-test("new template has disjoint preset, next-start and live scopes",()=>{
-  const text=read("templates/soundpad.html");assert.ok(text.includes('data-field="presetVolume"'));assert.ok(text.includes('data-field="liveVolume"'));
-  assert.ok(!text.includes('data-field="volume"'));assert.ok(text.includes('{{savedLabel}}'));
+test("template contains one volume input and explicit preset/live actions",()=>{
+  const text=read("templates/soundpad.html");assert.equal([...text.matchAll(/type="range"/g)].length,1);
+  assert.ok(text.includes('data-action="saveVolume"'));assert.ok(text.includes('data-action="applyVolume"'));
+  assert.ok(!text.includes('data-field="presetVolume"'));assert.ok(!text.includes('data-field="liveVolume"'));
+  assert.ok(text.includes('{{savedLabel}}'));
   assert.ok(!text.slice(text.indexOf('<div class="csm-live">')).includes('{{selected.label}}'));
 });
 test("branding and technical identity remain consistent",()=>{
@@ -168,9 +171,8 @@ test("registration covers playlist, scene-control data and scene rendering hooks
   const names=[];globalThis.Hooks={on:name=>names.push(name)};registerSoundPadLauncher();registerSoundPadLauncher();
   assert.deepEqual(names,["renderPlaylistDirectory","getSceneControlButtons","renderSceneControls"]);
 });
-
-test("legacy volume event is runtime-only and cannot create a preset draft",async()=>{
+test("volume entry never creates a sound-editor draft or changes saved presets",async()=>{
   await pad.onChange(change("volume","0.25"));
   assert.equal(pad.drafts.size,0);assert.equal(library.read().pads[0].sounds[0].volume,.4);
-  assert.equal(env.emitted.at(-1).data.volume,.25**1.5);
+  assert.equal(env.emitted.length,0);
 });

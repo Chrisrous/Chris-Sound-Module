@@ -2,3 +2,11 @@ node_modules/
 dist/
 __pycache__/
 *.log
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+coverage/
+playwright-report/
+test-results/

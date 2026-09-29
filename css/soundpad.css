@@ -74,3 +74,20 @@
 /* Existing right-sidebar launcher retained. */
 .chris-sound-module-launcher { padding: 8px; flex: 0 0 auto; }
 .chris-sound-module-open { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+
+/* One control area; the editor no longer reserves a second volume row. */
+.chris-sound-module .csm-volume { border-top: 1px solid var(--csm-border); padding-top: 6px; margin-top: 6px; }
+.chris-sound-module .csm-volume > label { display: flex; flex-direction: row; justify-content: space-between; }
+.chris-sound-module .csm-volume input[type="range"] { width: 100%; margin: 4px 0; }
+.chris-sound-module .csm-volume .csm-row { margin: 5px 0 0; }
+.chris-sound-module .csm-live { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 10px; }
+.chris-sound-module .csm-live > :not(button) { grid-column: 1; }
+.chris-sound-module .csm-live > button { grid-column: 2; grid-row: 1 / span 3; align-self: center; max-width: 205px; }
+.chris-sound-module .csm-live-reports { max-height: 45px; }
+.chris-sound-module .csm-transport { gap: 6px; }
+.chris-sound-module .csm-workspace { min-height: 140px; }
+@container (max-width: 550px) {
+  .chris-sound-module .csm-volume .csm-row { flex-wrap: wrap; }
+  .chris-sound-module .csm-volume .csm-row > button { flex-basis: 100%; }
+  .chris-sound-module .csm-live > button { max-width: 140px; }
+}

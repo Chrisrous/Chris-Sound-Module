@@ -78,7 +78,7 @@
       "NoSelection": "No sound selected",
       "NoTargets": "No recipients selected",
       "DefaultVolume": "Default volume for this sound",
-      "PresetHint": "Presets only. Saving does not change active playback. Play and Preview use saved values.",
+      "PresetHint": "Edit this entry only. Set its volume with the single control below and Save as sound default.",
       "NextStart": "Next play",
       "StartRecipients": "Play will send to",
       "LiveScope": "Playback at selected recipients",
@@ -91,7 +91,11 @@
       "RequestedVolume": "requested level",
       "NoPreview": "No preview",
       "ClearTargets": "Clear selection",
-      "RecipientHint": "Select the recipients for Play, Volume and Stop. Selecting or clearing recipients does not start or stop audio."
+      "RecipientHint": "Select the recipients for Play, Volume and Stop. Selecting or clearing recipients does not start or stop audio.",
+      "VolumeHint": "For the next Play and Preview. Current playback changes only with Apply.",
+      "ApplyVolume": "Apply to recipient playback",
+      "SaveVolume": "Save as sound default",
+      "ApplyRecipients": "Apply affects"
     },
     "Messages": {
       "SelectSoundFirst": "Please select a sound first.",
@@ -113,7 +117,9 @@
       "InvalidPreset": "Invalid preset. Volume must be 0 to 1 and fades 0 to 30 seconds.",
       "NameRequired": "Enter a name first.",
       "GroupRequired": "Enter a group name and select at least one recipient.",
-      "TargetsChanged": "The recipient selection changed during the volume gesture. Review it and move the slider again."
+      "TargetsChanged": "The recipient selection changed during the volume gesture. Review it and move the slider again.",
+      "VolumeContextChanged": "Sound or recipients changed during the gesture. Set the level again.",
+      "VolumeSaved": "Sound default volume saved."
     },
     "Error": {
       "startTimeout": "Audio could not start within 60 seconds. Send a new command after audio is ready.",

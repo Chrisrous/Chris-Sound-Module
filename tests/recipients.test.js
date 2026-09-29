@@ -82,10 +82,10 @@ test("recipient disclosure opens and closes without replacing inputs", async () 
 });
 test("checkbox change invalidates an existing volume gesture, including change-back", async () => {
   await pad.onChange(change("player", true));
-  const target = { dataset: { field: "liveVolume" }, value: "0.1" };
-  pad.volumeGestures.set(target, pad.targetRevision);
+  const target = { dataset: { field: "volume" }, value: "0.1" };
+  pad.beginVolumeGesture(target);
   await pad.onChange(change("other", true)); await pad.onChange(change("other", false));
-  await assert.rejects(pad.onChange({ target }), /TargetsChanged/); assert.equal(env.emitted.length, 0);
+  await assert.rejects(pad.onChange({ target }), /VolumeContextChanged/); assert.equal(env.emitted.length, 0);
 });
 test("selection does not stop or relabel running A when B is selected", async () => {
   await pad.mutate(data => data.pads[0].sounds.push(newEntry({ ...env.sound, name: "B" })));
@@ -98,7 +98,7 @@ test("selection does not stop or relabel running A when B is selected", async ()
 test("Stop and volume after selection change target only the new recipients", async () => {
   await pad.onChange(change("player", true)); await pad.onChange(change("player", false));
   await pad.onChange(change("other", true)); const before = library.read();
-  await pad.onChange({ target: { dataset: { field: "liveVolume" }, value: "0.2" } }); await pad.dispatch("stopSound");
+  await pad.onChange({ target: { dataset: { field: "volume" }, value: "0.2" } }); await pad.dispatch("applyVolume"); await pad.dispatch("stopSound");
   assert.deepEqual(env.emitted.map(entry => [entry.data.action, entry.data.userId]), [["changeVolume", "other"], ["stopSound", "other"]]);
   assert.deepEqual(library.read(), before);
 });
