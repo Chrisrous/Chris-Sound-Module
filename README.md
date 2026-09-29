@@ -49,7 +49,7 @@ Both launchers and legacy macros are retained. No additional Foundry module depe
 | [Changelog](CHANGELOG.md) | Concise version history |
 | [Contributing](CONTRIBUTING.md) | Development workflow and conventions |
 | [Security](SECURITY.md) | Known limits and responsible reporting |
-| [Historical records](docs/archive/README.md) | Preserved RC1-RC5 development notes |
+| [Historical records](https://github.com/Chrisrous/Chris-Sound-Module/tree/feature/foundry-v14/docs/archive) | Preserved RC1-RC5 development notes |
 
 ## Development
 

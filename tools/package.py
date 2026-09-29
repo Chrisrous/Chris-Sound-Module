@@ -9,7 +9,8 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_DIRS = ("scripts", "templates", "css", "lang")
 DOCUMENTS = ("README.md", "LICENSE", "CHANGELOG.md", "docs/USER_GUIDE.md",
-             "docs/USER_GUIDE_DE.md", "docs/API.md", "docs/TESTING.md", "SECURITY.md")
+             "docs/USER_GUIDE_DE.md", "docs/API.md", "docs/TESTING.md", "SECURITY.md",
+             "CONTRIBUTING.md", "docs/ARCHITECTURE.md")
 
 
 def package_files(root: Path = ROOT) -> list[Path]:

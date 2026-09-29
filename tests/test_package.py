@@ -5,6 +5,8 @@ from importlib.util import module_from_spec, spec_from_file_location
 from io import StringIO
 from pathlib import Path
 import json
+import posixpath
+import re
 import tempfile
 import unittest
 import zipfile
@@ -49,6 +51,18 @@ class PackageTests(unittest.TestCase):
             with self.subTest(path=name):
                 self.assertFalse(any(part in name.split("/") for part in ("tests", "tools", "archive", ".github", "node_modules")))
                 self.assertNotIn("..", name.split("/"))
+
+    def test_packaged_document_links_resolve(self):
+        names = set(self.archive.namelist())
+        for name in names:
+            if not name.endswith(".md"):
+                continue
+            for target in re.findall(r"\]\(([^)]+)\)", self.archive.read(name).decode("utf-8")):
+                if target.startswith(("https:", "http:", "#", "mailto:")):
+                    continue
+                resolved = posixpath.normpath(posixpath.join(posixpath.dirname(name), target.split("#")[0]))
+                with self.subTest(document=name, target=target):
+                    self.assertIn(resolved, names)
 
     def test_checksum_matches_and_uses_lf(self):
         self.assertEqual(sha256(self.output.read_bytes()).hexdigest(), self.digest)
