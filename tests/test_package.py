@@ -33,8 +33,20 @@ class PackageTests(unittest.TestCase):
 
     def test_manifest_identity_and_version_match(self):
         source = json.loads((ROOT / "module.json").read_text(encoding="utf-8"))
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
         self.assertEqual(json.loads(self.archive.read("chris-sound-module/module.json")), source)
-        self.assertNotIn("verified", source["compatibility"])
+        self.assertEqual(source["id"], "chris-sound-module")
+        self.assertEqual(source["version"], package["version"])
+        if re.fullmatch(r"\d+\.\d+\.\d+", source["version"]):
+            approval = json.loads((ROOT / ".github/release-approval.json").read_text(encoding="utf-8"))
+            self.assertIs(approval["approved"], True)
+            self.assertEqual(approval["version"], source["version"])
+            verified = approval["exact_foundry_build"] or approval["foundry_generation"]
+            self.assertEqual(source["compatibility"]["verified"], verified)
+            self.assertEqual(source["download"],
+                             f"https://github.com/Chrisrous/Chris-Sound-Module/releases/download/v{source['version']}/chris-sound-module.zip")
+        else:
+            self.assertNotIn("verified", source["compatibility"])
 
     def test_all_runtime_and_document_bytes_match(self):
         expected = {
