@@ -1,15 +1,15 @@
 {
   "id": "chris-sound-module",
-  "title": "Chris Sound Module",
-  "description": "Ein Modul zum Senden und Empfangen von benutzerdefinierten Sound-Nachrichten.",
-  "version": "1.1.0",
+  "title": "Chris SoundPad",
+  "description": "Ein SoundPad für gezielte Sound-Wiedergabe an einzelne Spieler und Gruppen. Mit gespeicherten Pads, Vorhören und einem gemeinsamen Lautstärkeregler. Für Foundry VTT v14.",
+  "version": "2.0.0",
   "compatibility": {
-    "minimum": "12",
-    "verified": "12"
+    "minimum": "14",
+    "maximum": "14",
+    "verified": "14"
   },
   "esmodules": [
-    "scripts/socket-handler.js",
-	"scripts/SoundPad.js"
+    "scripts/main.js"
   ],
   "styles": [
     "css/soundpad.css"
@@ -35,5 +35,9 @@
   "socket": true,
   "url": "https://github.com/Chrisrous/Chris-Sound-Module",
   "manifest": "https://raw.githubusercontent.com/Chrisrous/Chris-Sound-Module/main/module.json",
-  "download": "https://github.com/Chrisrous/Chris-Sound-Module/releases/download/v1.1.0/chris-sound-module.zip"
+  "download": "https://github.com/Chrisrous/Chris-Sound-Module/releases/download/v2.0.0/chris-sound-module.zip",
+  "license": "LICENSE",
+  "readme": "README.md",
+  "bugs": "https://github.com/Chrisrous/Chris-Sound-Module/issues",
+  "changelog": "https://github.com/Chrisrous/Chris-Sound-Module/releases/tag/v2.0.0"
 }

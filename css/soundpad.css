@@ -1,151 +1,93 @@
-/* SoundPad Grunddesign */
-.chris-sound-soundpad {
-  padding: 20px;
-  font-family: 'Uncial Antiqua', serif;
-  max-width: 400px;
-  margin: auto;
-  color: #3c2f1a;
+/* All rules are scoped. No canvas/tool styling is changed. */
+.chris-sound-module .window-content { padding: 12px; overflow: auto; }
+.chris-sound-module .chris-sound-soundpad {
+  display: flex; flex-direction: column; gap: 10px; height: 100%; min-height: 0;
+  container-type: inline-size; color: var(--color-text-primary, inherit);
+  --csm-border: var(--color-border-light-primary, #747474);
+  --csm-panel: var(--background, var(--color-cool-5, #252830));
 }
-
-/* Label-Styling */
-.chris-sound-soundpad label {
-  font-size: 16px;
-  display: block;
-  margin-bottom: 5px;
-  color: #6b4b1a;
-  font-weight: bold;
+.chris-sound-module [hidden] { display: none !important; }
+.chris-sound-module :is(label, button, input, select, details, summary) { min-width: 0; }
+.chris-sound-module label { display: flex; flex-direction: column; gap: 3px; }
+.chris-sound-module input:is([type="text"], [type="search"], [type="number"]), .chris-sound-module select { width: 100%; }
+.chris-sound-module button { white-space: normal; line-height: 1.25; min-height: 30px; margin: 0; }
+.chris-sound-module :is(button, summary, input, select):focus-visible { outline: 2px solid var(--color-border-highlight, #f0a34a); outline-offset: 2px; }
+.chris-sound-module .csm-row { display: flex; align-items: end; gap: 8px; }
+.chris-sound-module .csm-row > * { flex: 1; }
+.chris-sound-module .csm-grow { flex: 2; }
+.chris-sound-module .csm-check { flex-direction: row; align-items: center; gap: 5px; }
+.chris-sound-module .csm-check input { flex: 0 0 auto; }
+.chris-sound-module .csm-toolbar { flex: 0 0 auto; position: relative; z-index: 5; }
+.chris-sound-module .csm-toolbar > .csm-row { align-items: center; }
+.chris-sound-module .csm-menu { flex: 0 0 auto; position: relative; }
+.chris-sound-module summary { cursor: pointer; padding: 6px; overflow-wrap: anywhere; }
+.chris-sound-module .csm-menu-body, .chris-sound-module .csm-target-body {
+  position: absolute; z-index: 20; padding: 12px; border: 1px solid var(--csm-border); border-radius: 5px;
+  background: var(--csm-panel); box-shadow: 0 5px 18px #0006; display: flex; flex-direction: column; gap: 8px;
 }
-
-/* Drop-Bereich für Sounds */
-.chris-sound-soundpad .soundpad-drop-area {
-  border: 3px dashed #6b4b1a;
-  border-radius: 10px;
-  padding: 10px;
-  text-align: center;
-  margin: 10px 0;
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  font-style: italic;
+.chris-sound-module .csm-menu-body { right: 0; width: 260px; }
+/* The recipient picker stays in normal flow: no popup behind the sound list. */
+.chris-sound-module .csm-target-body { position: static; max-height: min(240px, 30vh); overflow-y: auto; margin-top: 6px; }
+.chris-sound-module .csm-target-heading { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.chris-sound-module .csm-target-heading > div { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.chris-sound-module .csm-recipient-toggle { flex: 0 0 auto; width: auto; }
+.chris-sound-module .recipient-list .csm-check { min-height: 30px; cursor: pointer; }
+.chris-sound-module .recipient-list input[type="checkbox"] { width: 18px; height: 18px; margin: 0; cursor: pointer; }
+.chris-sound-module .recipient-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 6px; }
+.chris-sound-module .csm-target-picker small { opacity: .8; }
+.chris-sound-module .csm-filters { flex: 0 0 auto; }
+.chris-sound-module .csm-workspace { flex: 1 1 0; min-height: 100px; position: relative; }
+.chris-sound-module .sound-list { height: 100%; overflow: auto; padding: 4px; border: 1px solid var(--csm-border); border-radius: 5px; }
+.chris-sound-module .sound-row { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; padding: 3px 0; }
+.chris-sound-module .sound-button { flex: 1; text-align: left; padding: 7px 10px; overflow-wrap: anywhere; }
+.chris-sound-module .sound-button small { display: block; opacity: .75; font-size: .85em; font-weight: normal; }
+.chris-sound-module .sound-button.active { outline: 2px solid var(--color-border-highlight, #d89544); outline-offset: -2px; }
+.chris-sound-module .csm-icon { flex: 0 0 30px; width: 30px; }
+.chris-sound-module .csm-row-menu { flex: 0 0 auto; }
+.chris-sound-module .csm-entry-actions { display: flex; gap: 5px; }
+.chris-sound-module .sound-row:has(.csm-row-menu[open]) .csm-row-menu { flex-basis: 100%; }
+.chris-sound-module .csm-empty { padding: 30px 10px; text-align: center; }
+.chris-sound-module .csm-editor { position: absolute; z-index: 4; inset: 0 0 0 auto; width: min(330px, 100%); overflow: auto; padding: 12px; background: var(--csm-panel); border: 1px solid var(--csm-border); box-shadow: -4px 0 12px #0004; }
+.chris-sound-module .csm-editor > * { margin-top: 0; margin-bottom: 10px; }
+.chris-sound-module .csm-editor h3 { font-size: 1em; overflow-wrap: anywhere; }
+.chris-sound-module .csm-editing .sound-list { margin-right: 340px; }
+.chris-sound-module .csm-transport { flex: 0 0 auto; border-top: 1px solid var(--csm-border); padding-top: 9px; display: flex; flex-direction: column; gap: 8px; }
+.chris-sound-module .csm-next, .chris-sound-module .csm-live { padding: 8px; border: 1px solid var(--csm-border); border-radius: 5px; }
+.chris-sound-module .csm-next .csm-row { margin: 6px 0; }
+.chris-sound-module .csm-kicker { font-size: .8em; text-transform: uppercase; letter-spacing: .06em; margin-right: 6px; }
+.chris-sound-module .csm-primary { font-weight: bold; }
+.chris-sound-module .csm-hint { font-size: .83em; opacity: .85; margin: 3px 0 0; }
+.chris-sound-module .csm-live-targets { font-size: .9em; margin: 3px 0; overflow-wrap: anywhere; }
+.chris-sound-module .csm-live-reports { max-height: 64px; overflow: auto; font-size: .88em; border-left: 2px solid var(--csm-border); padding-left: 7px; }
+.chris-sound-module .csm-live-controls { margin-top: 6px; align-items: center; }
+.chris-sound-module .csm-bottom-row { display: flex; gap: 8px; align-items: start; }
+.chris-sound-module .csm-status-details { flex: 1; min-width: 0; }
+.chris-sound-module .recipient-status { max-height: 90px; overflow: auto; font-size: .9em; }
+.chris-sound-module .csm-panic { flex: 0 0 190px; border: 2px solid var(--color-level-error, #b94646); font-weight: bold; }
+.chris-sound-module .csm-status-warnings, .chris-sound-module .csm-unsaved { border-left: 3px solid var(--color-level-warning, #ce902f); padding-left: 7px; font-size: .85em; }
+@container (max-width: 620px) {
+  .chris-sound-module .csm-editing .sound-list { margin-right: 0; }
+  .chris-sound-module .csm-editor { width: 100%; }
+  .chris-sound-module .csm-filters { flex-wrap: wrap; }
+  .chris-sound-module .csm-panic { flex-basis: 145px; }
 }
+/* Existing right-sidebar launcher retained. */
+.chris-sound-module-launcher { padding: 8px; flex: 0 0 auto; }
+.chris-sound-module-open { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
 
-/* Sound-Button Styling */
-.chris-sound-soundpad .sound-button {
-  background: linear-gradient(135deg, #8c5c3f, #a46a50);
-  color: white;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  margin: 5px;
-  font-size: 16px;
-  font-family: 'Uncial Antiqua', serif;
-  transition: transform 0.2s, background 0.3s;
-  position: relative;
-  overflow: hidden;
-}
-
-.chris-sound-soundpad .sound-button:hover {
-  transform: scale(1.05);
-  background: linear-gradient(135deg, #e6b89c, #a46a50);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-}
-
-/* Partikel-Animation bei Klick */
-.chris-sound-soundpad .sound-button:active::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 150px;
-  height: 150px;
-  background: radial-gradient(circle, rgba(255, 255, 0, 0.5), rgba(255, 255, 0, 0));
-  border-radius: 50%;
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.5);
-  animation: particleEffect 0.6s ease-out;
-}
-
-@keyframes particleEffect {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(0.5);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(2);
-  }
-}
-
-/* Medien-Steuerung Buttons */
-.chris-sound-soundpad .media-controls button {
-  background: linear-gradient(135deg, #8c5c3f, #6b4b1a);
-  color: white;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  margin: 5px;
-  font-size: 16px;
-  font-family: 'Uncial Antiqua', serif;
-  transition: all 0.3s ease;
-}
-
-.chris-sound-soundpad .media-controls button:hover {
-  background: linear-gradient(135deg, #a46a50, #e6b89c);
-  color: black;
-  text-shadow: 1px 1px 5px rgba(255, 255, 255, 0.8);
-}
-
-/* Lautstärkeregler - Magischer Stil */
-.chris-sound-soundpad .volume-control {
-  margin: 15px 0;
-}
-
-.chris-sound-soundpad #volume-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 8px;
-  background: linear-gradient(90deg, #8c5c3f, #a46a50);
-  border-radius: 5px;
-  outline: none;
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-}
-
-.chris-sound-soundpad #volume-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 15px;
-  height: 15px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-}
-
-/* "Alle Sounds entfernen"-Button */
-.chris-sound-soundpad .clear-sounds {
-  background: linear-gradient(135deg, #a42b1d, #6b4b1a);
-  color: white;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 16px;
-  font-family: 'Uncial Antiqua', serif;
-  transition: background 0.3s, transform 0.2s;
-}
-
-.chris-sound-soundpad .clear-sounds:hover {
-  background: linear-gradient(135deg, #c33b2d, #e6b89c);
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-}
-
-/* Dekorative Trennlinien */
-.chris-sound-soundpad hr {
-  border: 0;
-  height: 2px;
-  background-image: linear-gradient(to right, #6b4b1a, #e6b89c, #6b4b1a);
-  margin: 15px 0;
+/* One control area; the editor no longer reserves a second volume row. */
+.chris-sound-module .csm-volume { border-top: 1px solid var(--csm-border); padding-top: 6px; margin-top: 6px; }
+.chris-sound-module .csm-volume > label { display: flex; flex-direction: row; justify-content: space-between; }
+.chris-sound-module .csm-volume input[type="range"] { width: 100%; margin: 4px 0; }
+.chris-sound-module .csm-volume .csm-row { margin: 5px 0 0; }
+.chris-sound-module .csm-live { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 10px; }
+.chris-sound-module .csm-live > :not(button) { grid-column: 1; }
+.chris-sound-module .csm-live > button { grid-column: 2; grid-row: 1 / span 3; align-self: center; max-width: 205px; }
+.chris-sound-module .csm-live-reports { max-height: 45px; }
+.chris-sound-module .csm-transport { gap: 6px; }
+.chris-sound-module .csm-workspace { min-height: 140px; }
+@container (max-width: 550px) {
+  .chris-sound-module .csm-volume .csm-row { flex-wrap: wrap; }
+  .chris-sound-module .csm-volume .csm-row > button { flex-basis: 100%; }
+  .chris-sound-module .csm-live > button { max-width: 140px; }
 }

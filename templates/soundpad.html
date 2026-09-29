@@ -1,46 +1,117 @@
-<form class="chris-sound-soundpad">
-  <!-- Spieler-Auswahl -->
-  <div class="form-group">
-    <label for="player-select">{{localize "CHRIS_SOUND_MODULE.UI.SelectTargetPlayer"}}</label>
-    <select id="player-select" class="player-select form-control">
-      {{#each users}}
-      <option value="{{this.name}}">{{this.name}}</option>
+<section class="chris-sound-soundpad">
+  <header class="csm-toolbar">
+    <div class="csm-row">
+      <label class="csm-grow">{{localize "CHRIS_SOUND_MODULE.UI.ActivePad"}}<select data-field="pad">{{#each pads}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}</select></label>
+      <details data-panel="pads" class="csm-menu" {{#if padsOpen}}open{{/if}}>
+        <summary>{{localize "CHRIS_SOUND_MODULE.UI.ManagePad"}}</summary>
+        <div class="csm-menu-body">
+          <label>{{localize "CHRIS_SOUND_MODULE.UI.Name"}}<input data-field="padName" type="text" maxlength="120" value="{{padName}}"></label>
+          <button type="button" data-action="newPad">{{localize "CHRIS_SOUND_MODULE.UI.NewPad"}}</button>
+          <button type="button" data-action="renamePad">{{localize "CHRIS_SOUND_MODULE.UI.Rename"}}</button>
+          <button type="button" data-action="toggleSort" aria-pressed="{{sortMode}}">{{localize "CHRIS_SOUND_MODULE.UI.SortSounds"}}</button>
+          <hr>
+          <button type="button" data-action="clearSounds">{{localize "CHRIS_SOUND_MODULE.UI.ClearSounds"}}</button>
+          <button type="button" data-action="deletePad">{{localize "CHRIS_SOUND_MODULE.UI.DeletePad"}}</button>
+        </div>
+      </details>
+    </div>
+    <section class="csm-target-picker">
+      <div class="csm-target-heading">
+        <div><strong>{{localize "CHRIS_SOUND_MODULE.UI.Recipients"}}:</strong> <span class="csm-target-summary">{{targetSummary}}</span></div>
+        <button type="button" class="csm-recipient-toggle" data-action="toggleRecipients" aria-expanded="{{#if targetsOpen}}true{{else}}false{{/if}}" aria-controls="soundpad-recipients">{{localize "CHRIS_SOUND_MODULE.UI.ChangeSelection"}}</button>
+      </div>
+      <div id="soundpad-recipients" class="csm-target-body" {{#unless targetsOpen}}hidden{{/unless}}>
+        <p class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.RecipientHint"}}</p>
+        <label>{{localize "CHRIS_SOUND_MODULE.UI.Group"}}<select data-field="group"><option value="">{{localize "CHRIS_SOUND_MODULE.UI.ManualSelection"}}</option>{{#each groups}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}</select></label>
+        <div class="recipient-list">{{#each users}}<label class="csm-check" for="soundpad-recipient-{{id}}"><input id="soundpad-recipient-{{id}}" name="csm-recipient-{{id}}" data-field="target" type="checkbox" value="{{id}}" {{#if selected}}checked{{/if}}><span>{{name}}{{#unless active}} ({{localize "CHRIS_SOUND_MODULE.Status.offline"}}){{/unless}}</span></label>{{/each}}</div>
+        <div class="csm-row">
+          <button type="button" data-action="selectOnline">{{localize "CHRIS_SOUND_MODULE.UI.OnlinePlayers"}}</button>
+          <button type="button" data-action="clearTargets" {{#unless hasTargets}}disabled{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.ClearTargets"}}</button>
+          <button type="button" data-action="toggleRecipients">{{localize "CHRIS_SOUND_MODULE.UI.Done"}}</button>
+        </div>
+        <div class="csm-row">
+          <label class="csm-grow">{{localize "CHRIS_SOUND_MODULE.UI.GroupName"}}<input data-field="groupName" type="text" maxlength="120" value="{{groupName}}"></label>
+          <button type="button" data-action="saveGroup">{{localize "CHRIS_SOUND_MODULE.UI.SaveGroup"}}</button>
+        </div>
+        <button type="button" data-action="updateGroup" {{#unless canUpdateGroup}}hidden{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.UpdateGroup"}}: <span class="csm-group-edit-name">{{groupEditName}}</span></button>
+        <button type="button" data-action="deleteGroup" {{#unless groupEditName}}hidden{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.DeleteGroup"}}: <span class="csm-group-edit-name">{{groupEditName}}</span></button>
+      </div>
+    </section>
+  </header>
+
+  <div class="csm-filters csm-row">
+    <label class="csm-grow">{{localize "CHRIS_SOUND_MODULE.UI.Search"}}<input type="search" data-field="search" value="{{search}}"></label>
+    <label>{{localize "CHRIS_SOUND_MODULE.UI.Category"}}<select data-field="categoryFilter"><option value="">{{localize "CHRIS_SOUND_MODULE.UI.AllCategories"}}</option>{{#each categories}}<option value="{{name}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}</select></label>
+    <label class="csm-check"><input type="checkbox" data-field="favoritesOnly" {{#if favoritesOnly}}checked{{/if}}>{{localize "CHRIS_SOUND_MODULE.UI.Favorites"}}</label>
+  </div>
+  <div class="csm-workspace {{#if editorOpen}}csm-editing{{/if}}">
+    <div class="soundpad-drop-area sound-list">
+      {{#if sortMode}}<div class="csm-row"><p class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.SortHint"}}</p><button type="button" data-action="toggleSort">{{localize "CHRIS_SOUND_MODULE.UI.Done"}}</button></div>{{/if}}
+      {{#each sounds}}
+      <div class="sound-row" data-id="{{id}}">
+        <button class="sound-button {{#if selected}}active{{/if}}" type="button" data-action="selectSound" data-id="{{id}}" aria-pressed="{{#if selected}}true{{else}}false{{/if}}">{{label}}<small>{{category}} {{playlist}}{{#if dirty}} · {{localize "CHRIS_SOUND_MODULE.UI.UnsavedShort"}}{{/if}}</small></button>
+        <button class="csm-icon" type="button" data-action="favorite" data-id="{{id}}" aria-pressed="{{#if favorite}}true{{else}}false{{/if}}" aria-label="{{localize 'CHRIS_SOUND_MODULE.UI.Favorite'}}" title="{{localize 'CHRIS_SOUND_MODULE.UI.Favorite'}}"><i class="{{#if favorite}}fa-solid{{else}}fa-regular{{/if}} fa-star" aria-hidden="true"></i></button>
+        {{#if ../sortMode}}
+        <button class="csm-icon" type="button" data-action="moveUp" data-id="{{id}}" aria-label="{{localize 'CHRIS_SOUND_MODULE.UI.MoveUp'}}" title="{{localize 'CHRIS_SOUND_MODULE.UI.MoveUp'}}"><i class="fa-solid fa-arrow-up" aria-hidden="true"></i></button>
+        <button class="csm-icon" type="button" data-action="moveDown" data-id="{{id}}" aria-label="{{localize 'CHRIS_SOUND_MODULE.UI.MoveDown'}}" title="{{localize 'CHRIS_SOUND_MODULE.UI.MoveDown'}}"><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></button>
+        {{/if}}
+        <details class="csm-row-menu" data-panel="entry-{{id}}" {{#if menuOpen}}open{{/if}}><summary>{{localize "CHRIS_SOUND_MODULE.UI.Actions"}}</summary>
+          <div class="csm-entry-actions">
+            <button type="button" data-action="editSound" data-id="{{id}}">{{localize "CHRIS_SOUND_MODULE.UI.EditSound"}}</button>
+            <button type="button" data-action="removeSound" data-id="{{id}}">{{localize "CHRIS_SOUND_MODULE.UI.Remove"}}</button>
+          </div>
+        </details>
+      </div>
+      {{else}}
+        <div class="csm-empty"><strong>{{localize "CHRIS_SOUND_MODULE.UI.EmptyPad"}}</strong><p>{{localize "CHRIS_SOUND_MODULE.UI.DropAreaHint"}}</p></div>
       {{/each}}
-    </select>
+    </div>
+    {{#if editorOpen}}
+    <aside class="csm-editor" aria-label="{{localize 'CHRIS_SOUND_MODULE.UI.EditSound'}}">
+      <h3>{{localize "CHRIS_SOUND_MODULE.UI.EditSound"}}: {{selected.label}}</h3>
+      <p class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.PresetHint"}}</p>
+      <p class="csm-unsaved" {{#unless selectedDirty}}hidden{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.UnsavedPreset"}}</p>
+      <label>{{localize "CHRIS_SOUND_MODULE.UI.Alias"}}<input data-field="alias" type="text" maxlength="120" value="{{selected.alias}}"></label>
+      <label>{{localize "CHRIS_SOUND_MODULE.UI.Category"}}<input data-field="category" type="text" maxlength="60" value="{{selected.category}}"></label>
+
+      <label>{{localize "CHRIS_SOUND_MODULE.UI.Repeat"}}<select data-field="repeat"><option value="inherit" {{#if selected.loopDefault}}selected{{/if}}>{{localize "CHRIS_SOUND_MODULE.UI.FromPlaylist"}}</option><option value="yes" {{#if selected.loopYes}}selected{{/if}}>{{localize "CHRIS_SOUND_MODULE.UI.Yes"}}</option><option value="no" {{#if selected.loopNo}}selected{{/if}}>{{localize "CHRIS_SOUND_MODULE.UI.No"}}</option></select></label>
+      <div class="csm-row"><label>{{localize "CHRIS_SOUND_MODULE.UI.FadeIn"}}<input data-field="fadeIn" type="number" min="0" max="30" step="0.1" value="{{selected.fadeInSeconds}}"></label><label>{{localize "CHRIS_SOUND_MODULE.UI.FadeOut"}}<input data-field="fadeOut" type="number" min="0" max="30" step="0.1" value="{{selected.fadeOutSeconds}}"></label></div>
+      <div class="csm-row"><button type="button" data-action="savePreset">{{localize "CHRIS_SOUND_MODULE.UI.SavePreset"}}</button><button type="button" data-action="cancelEdit">{{localize "CHRIS_SOUND_MODULE.UI.Cancel"}}</button></div>
+    </aside>
+    {{/if}}
   </div>
 
-  <!-- Drop-Bereich für Sounds -->
-  <div class="soundpad-drop-area">
-    {{localize "CHRIS_SOUND_MODULE.UI.DropAreaHint"}}
-  </div>
-
-  <!-- Liste der Sounds -->
-  <div class="sound-list">
-    {{#each sounds}}
-    <button type="button" class="sound-button" data-sound-id="{{@index}}" data-sound-name="{{this.name}}" data-src="{{this.src}}">
-      {{this.name}}
-    </button>
-    {{/each}}
-  </div>
-
-  <!-- Anzeige des aktuell ausgewählten Sounds -->
-  <div class="selected-sound-info">
-    <span>{{localize "CHRIS_SOUND_MODULE.UI.CurrentSound"}}</span>
-    <span class="selected-sound-display">{{selectedSoundName}}</span>
-  </div>
-
-  <!-- Medien-Steuerung -->
-  <div class="media-controls">
-    <button type="button" class="play-button" style="position: relative;">🎵 Play</button>
-    <button type="button" class="stop-button" style="position: relative;">🛑 Stop</button>
-  </div>
-
-  <!-- Lautstärkeregler -->
-  <div class="volume-control">
-    <label for="volume-slider">{{localize "CHRIS_SOUND_MODULE.UI.Volume"}}</label>
-    <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.8" />
-  </div>
-
-  <!-- Button: Alle Sounds entfernen -->
-  <button type="button" class="clear-sounds">{{localize "CHRIS_SOUND_MODULE.UI.ClearSounds"}}</button>
-</form>
+  <footer class="csm-transport">
+    <div class="csm-next">
+      <div><span class="csm-kicker">{{localize "CHRIS_SOUND_MODULE.UI.NextStart"}}</span> <strong>{{savedLabel}}</strong></div>
+      <div class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.StartRecipients"}}: <span class="csm-target-summary">{{targetSummary}}</span></div>
+      <div class="csm-row">
+        <button class="csm-primary" type="button" data-action="playSound" {{#unless canPlay}}disabled{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.Play"}}</button>
+        <button type="button" data-action="togglePreview">{{localize "CHRIS_SOUND_MODULE.UI.Preview"}}</button>
+        <button type="button" data-action="editSound" {{#unless selected}}disabled{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.EditSound"}}</button>
+      </div>
+      <div class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.PreviewStatus"}} <span class="preview-status"></span></div>
+    <section class="csm-volume" aria-label="{{localize 'CHRIS_SOUND_MODULE.UI.Volume'}}">
+      <label for="csm-volume">{{localize "CHRIS_SOUND_MODULE.UI.Volume"}} <output class="volume-value" for="csm-volume">{{volumePercent}}%</output></label>
+      <input id="csm-volume" type="range" data-field="volume" min="0" max="1" step="0.01" value="{{volumeInput}}" aria-describedby="csm-volume-hint">
+      <p id="csm-volume-hint" class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.VolumeHint"}}</p>
+      <div class="csm-row">
+        <button type="button" data-action="applyVolume" {{#unless hasTargets}}disabled{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.ApplyVolume"}}</button>
+        <button type="button" data-action="saveVolume" {{#unless selected}}disabled{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.SaveVolume"}}</button>
+      </div>
+      <p class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.ApplyRecipients"}}: <span class="csm-target-summary">{{targetSummary}}</span></p>
+    </section>
+    </div>
+    <div class="csm-live">
+      <strong>{{localize "CHRIS_SOUND_MODULE.UI.LiveScope"}}</strong>
+      <div class="csm-live-targets">{{localize "CHRIS_SOUND_MODULE.UI.ControlRecipients"}}: <span class="csm-target-summary">{{targetSummary}}</span></div>
+      <div class="csm-live-reports" aria-live="polite"></div>
+      <button type="button" data-action="stopSound" {{#unless hasTargets}}disabled{{/unless}}>{{localize "CHRIS_SOUND_MODULE.UI.StopTargets"}}</button>
+    </div>
+    <div class="csm-status-warnings" role="status" hidden></div>
+    <div class="csm-bottom-row">
+      <details data-panel="status" class="csm-status-details" {{#if statusOpen}}open{{/if}}><summary>{{localize "CHRIS_SOUND_MODULE.UI.AllReports"}}: <span class="csm-status-summary"></span></summary><div class="recipient-status" role="status" aria-live="polite"></div><p class="csm-hint">{{localize "CHRIS_SOUND_MODULE.UI.StatusHint"}}</p></details>
+      <button class="csm-panic" type="button" data-action="panic">{{localize "CHRIS_SOUND_MODULE.UI.Panic"}}</button>
+    </div>
+  </footer>
+</section>

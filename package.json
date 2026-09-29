@@ -1,0 +1,19 @@
+{
+  "name": "chris-sound-module",
+  "version": "2.0.0",
+  "description": "Chris SoundPad for Foundry Virtual Tabletop v14",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "repository": "github:Chrisrous/Chris-Sound-Module",
+  "scripts": {
+    "check": "node tools/check.mjs",
+    "test": "node tools/test.mjs",
+    "validate": "npm run check && npm test && npm run test:package",
+    "package": "python tools/package.py",
+    "test:package": "python -m unittest discover -s tests -p test_package.py"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

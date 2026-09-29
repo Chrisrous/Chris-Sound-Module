@@ -1,0 +1,35 @@
+name: Bug report
+description: Report a reproducible Chris SoundPad problem
+title: "[Bug] "
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Exact Foundry build, Chris SoundPad version and game system/version
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and operating system
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Include selected sound, actual playing sound, recipients and other enabled UI/audio modules.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual result
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted logs or screenshots
+      description: Remove credentials, signed URLs and private world/player data.
