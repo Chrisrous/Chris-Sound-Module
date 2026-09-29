@@ -3,14 +3,26 @@
 A GM-operated SoundPad for targeted playlist audio. Foundry VTT v14, English/German,
 no additional Foundry module or npm runtime dependencies.
 
-## 2.0.0-rc.2: core feature expansion
+## 2.0.0-rc.3: visible SoundPad launcher
 
 This is a **manual-install release candidate**. The v14 API migration and the feature
 expansion have automated tests, but **no real Foundry/browser/multi-client certification**.
 `compatibility.verified` is deliberately unset. Main and the stable release are not updated.
 Foundry v12/v13 are not supported by this candidate.
 
+### Open the SoundPad
+
+As a GM, open the **Playlists** tab in the right sidebar and click **Open SoundPad**
+(**SoundPad öffnen** in German) at the top. The same button is added to the playlist
+popout. No macro, scene or canvas control is required. Clicking again brings the
+existing pad to the front, restores it if minimized, and preserves unsaved fields.
+Players do not receive the GM launcher. Configure Settings and opening macros remain available.
+
+See [the RC3 change and validation record](docs/RC3_LAUNCHER.md).
+
 ### Included
+
+- Visible, localized GM launcher at the top of the Playlists directory.
 
 - Named sound pads and target groups saved in user-scoped world settings.
 - Search, favorites, categories, custom display names, individual removal and manual ordering.
@@ -21,20 +33,22 @@ Foundry v12/v13 are not supported by this candidate.
 - Each player controls their own module volume factor and mute in module settings.
 - Cancellation guards, duplicate suppression and non-buffered socket delivery. No automatic replay.
 
-**Deferred comfort package:** JSON export/import and additional quick-access buttons/keybindings.
+**Deferred comfort package:** JSON export/import, keybindings and further quick-access controls.
+The basic playlist launcher is included now, not deferred.
 Parallel audio tracks, scene automation and synchronized/sample-accurate starts are also out of scope.
 
 ## Install / upgrade the candidate
 
 1. Back up the Foundry world and existing `Data/modules/chris-sound-module` directory.
 2. Stop Foundry. Replace the module directory with the directory inside the candidate ZIP.
-3. Check `Data/modules/chris-sound-module/module.json`: version must be `2.0.0-rc.2`.
+3. Check `Data/modules/chris-sound-module/module.json`: version must be `2.0.0-rc.3`.
 4. Restart Foundry, enable the module in a v14 test world and reload **all** clients.
-5. Open SoundPad via Configure Settings or the macro below. Complete the live checklist in
-   [the migration and test record](docs/V14_MIGRATION.md).
+5. As GM, open **Playlists > Open SoundPad**. Complete the launcher checks in
+   [the RC3 record](docs/RC3_LAUNCHER.md) and core checks in [the migration record](docs/V14_MIGRATION.md).
 
-Do not mix RC1 and RC2 browser tabs: the socket protocol changed. RC1 had no persistent pads,
-so drag its desired sounds into RC2 once. The RC intentionally has no `manifest`/`download`
+RC3 keeps RC2's stored pads, preferences and protocol 2 without a data migration. Reload all
+clients after updating. Do not mix RC1 with RC2/RC3 tabs: RC1 used a different socket protocol
+and had no persistent pads, so its desired sounds must be added once. The RC intentionally has no `manifest`/`download`
 update URLs. It is not distributed by the previous stable automatic update channel.
 
 ## SoundPad workflow

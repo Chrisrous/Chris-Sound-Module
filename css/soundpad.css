@@ -19,3 +19,21 @@
 .chris-sound-soundpad .csm-hint { font-size: 0.85em; opacity: 0.8; margin: 0; }
 .chris-sound-soundpad .csm-panic { border: 2px solid var(--color-level-error, #c44); font-weight: bold; min-height: 2.4rem; }
 .chris-sound-soundpad button:focus-visible, .chris-sound-soundpad input:focus-visible, .chris-sound-soundpad select:focus-visible { outline: 2px solid var(--color-border-highlight, #a86); outline-offset: 1px; }
+
+/* Visible sidebar entry point, also used in a popped-out Playlist directory. */
+.chris-sound-module-launcher {
+  display: flex;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.5rem;
+}
+.chris-sound-module-launcher .chris-sound-module-open {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 2.25rem;
+  white-space: normal;
+}

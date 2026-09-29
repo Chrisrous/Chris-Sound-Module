@@ -1,13 +1,15 @@
-import { MODULE_ID, requireGM, reportError } from "./shared.js";
+import { MODULE_ID, reportError } from "./shared.js";
 import { SoundPad } from "./SoundPad.js";
+import { openSoundPad, registerSoundPadLauncher, refreshSoundPadLauncher } from "./launcher.js";
+export { openSoundPad } from "./launcher.js";
 import { EMPTY_LIBRARY } from "./library.js";
 import { getService, registerSocket, playSoundForUser, stopSoundForUser, changeVolumeForUser,
   playSoundForUsers, stopAllModuleSounds, previewSound, stopPreview,
   playSoundForPlayer, controlSoundForPlayer, changeVolumeForPlayer } from "./socket-handler.js";
 
-export function openSoundPad() { requireGM(); return new SoundPad().render({ force: true }); }
 const refreshPreferences = () => { if (game.ready) void getService().refreshPreferences().catch(reportError); };
 Hooks.once("init", () => {
+  registerSoundPadLauncher();
   game.settings.register(MODULE_ID, "enableLogging", {
     name: "CHRIS_SOUND_MODULE.Setting.EnableLoggingName", hint: "CHRIS_SOUND_MODULE.Setting.EnableLoggingHint",
     scope: "client", config: true, default: false, type: Boolean
@@ -37,6 +39,7 @@ Hooks.once("ready", () => {
   }
   globalThis.SoundPad = SoundPad;
   if (game.user.isGM) globalThis.soundPad = new SoundPad();
+  refreshSoundPadLauncher();
   Hooks.on("userConnected", (user, connected) => {
     if (!connected) getService().tracker.disconnected(user.id);
     if (SoundPad.instance?.rendered) void SoundPad.instance.render().catch(reportError);
