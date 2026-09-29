@@ -34,7 +34,7 @@ export class SoundService {
       muted: this.getGame().settings.get(MODULE_ID, "personalMute") === true });
     this.playback = new SoundPlayback(() => this.getGame().audio, prefs);
     this.preview = new SoundPlayback(() => this.getGame().audio, prefs);
-    this.previewStatus = "stopped";
+    this.previewStatus = "stopped"; this.previewLabel = "";
   }
   requireGM() { if (!this.getGame().user?.isGM) throw new Error(message("Messages.GmOnly")); }
   emit(packet) {
@@ -166,12 +166,25 @@ export class SoundService {
     this.requireGM();
     const intent = this.previewIntent = {};
     const epoch = this.epoch;
-    const sound = await foundry.utils.fromUuid(uuid);
-    this.requireGM();
-    if (this.previewIntent !== intent || epoch !== this.epoch) return false;
-    return this.preview.play(soundData(sound, options), status => { this.previewStatus = status; this.tracker.changed(); });
+    this.tracker.changed();
+    try {
+      const sound = await foundry.utils.fromUuid(uuid);
+      this.requireGM();
+      if (this.previewIntent !== intent || epoch !== this.epoch) return false;
+      const data = soundData(sound, options), label = options.label ?? sound.name;
+      this.previewLabel = label;
+      return await this.preview.play(data, status => {
+        this.previewStatus = status; this.previewLabel = label; this.tracker.changed();
+      });
+    } finally {
+      if (this.previewIntent === intent) this.previewIntent = null;
+      this.tracker.changed();
+    }
   }
-  stopPreview() { this.requireGM(); this.previewIntent = null; return this.preview.stop({ immediate: true }); }
+  stopPreview() {
+    this.requireGM(); this.previewIntent = null; this.tracker.changed();
+    return this.preview.stop({ immediate: true });
+  }
   refreshPreferences() { return Promise.all([this.playback.refreshPreferences(), this.preview.refreshPreferences()]); }
 }
 

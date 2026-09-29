@@ -354,7 +354,7 @@ test("search/category/favorite filters operate on display and original metadata"
 });
 test("preset editor persists aliases, categories, repeat and fades", async () => {
   const pad = new SoundPad(); await pad._onDrop(drop({ type: "PlaylistSound", uuid: env.sound.uuid })); pad.selectedSoundId = pad.pad.sounds[0].id;
-  const fields = { alias: "Quiet thunder", category: "Weather", repeat: "no", fadeIn: "0.5", fadeOut: "1.5" };
+  const fields = { alias: "Quiet thunder", category: "Weather", repeat: "no", fadeIn: "0.5", fadeOut: "1.5", presetVolume: "0.25" };
   pad.field = name => ({ value: fields[name] }); await pad.dispatch("savePreset");
   assert.equal(pad.selected.alias, "Quiet thunder"); assert.equal(pad.selected.loop, false); assert.equal(pad.selected.fadeOut, 1500);
 });
@@ -373,7 +373,7 @@ test("delete/clear use confirmation and never stop audio or delete playlists", a
 });
 test("status text uses textContent for untrusted names and aliases", async () => {
   const pad = new SoundPad(); await pad._prepareContext({}); env.users.get("player").name = "<script>unsafe</script>";
-  const root = fakeNode(), preview = fakeNode(); pad.element = { querySelector: selector => selector === ".recipient-status" ? root : preview };
+  const root = fakeNode(), preview = fakeNode(); pad.element = { querySelector: selector => selector === ".recipient-status" ? root : selector === ".preview-status" ? preview : null };
   socket.getService().tracker.track(command(), "<img src=x>"); pad.renderStatus(); assert.ok(root.children[1].textContent.includes("<script>unsafe</script>"));
   assert.equal(root.children[1].innerHTML, undefined);
 });
@@ -391,18 +391,18 @@ test("entry registers user-scoped persistence/preferences and exposes old/new AP
   await globalThis.playSoundForPlayer("Player", "Weather", "Thunder"); assert.equal(env.emitted.length, 1);
 });
 
-test("native delegated slider input changes display only; release converts volume and sends once", async () => {
+test("native live slider sends once on release without rewriting the selected preset", async () => {
   const pad = new SoundPad(); await pad._onDrop(drop({ type: "PlaylistSound", uuid: env.sound.uuid }));
   pad.selectedSoundId = pad.pad.sounds[0].id; pad.targetIds = ["player"];
   const root = fakeNode(), dropArea = fakeNode(), label = fakeNode();
   root.querySelector = selector => selector === ".soundpad-drop-area" ? dropArea : label;
   pad.element = { querySelector: selector => selector === ".chris-sound-soundpad" ? root : null, querySelectorAll: () => [] };
   await pad._onRender({}, {});
-  const event = { target: { dataset: { field: "volume" }, value: "0.25" } };
+  const event = { target: { dataset: { field: "liveVolume" }, value: "0.25" } };
   root.listeners.input(event); assert.equal(label.textContent, "25%"); assert.equal(env.emitted.length, 0);
   root.listeners.change(event); await tick();
   assert.equal(env.emitted.length, 1); assert.equal(env.emitted[0].data.volume, 0.125);
-  assert.equal(library.read().pads[0].sounds[0].volume, 0.125);
+  assert.equal(library.read().pads[0].sounds[0].volume, 0.4);
   const over = { preventDefault() { this.prevented = true; }, dataTransfer: {} };
   dropArea.listeners.dragover(over); assert.equal(over.prevented, true); assert.equal(over.dataTransfer.dropEffect, "copy");
 });

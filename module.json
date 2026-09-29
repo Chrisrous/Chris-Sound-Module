@@ -1,8 +1,8 @@
 {
   "id": "chris-sound-module",
-  "title": "Chris Sound Module",
+  "title": "Chris SoundPad",
   "description": "Ein SoundPad für gezielte Sound-Wiedergabe an einzelne Spieler. Foundry v14 Release Candidate; Live-Abnahme ausstehend.",
-  "version": "2.0.0-rc.3",
+  "version": "2.0.0-rc.4",
   "compatibility": {
     "minimum": "14",
     "maximum": "14"

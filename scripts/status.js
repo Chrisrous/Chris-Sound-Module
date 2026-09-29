@@ -7,7 +7,12 @@ export class StatusTracker {
   subscribe(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
   changed() { for (const fn of this.listeners) { try { fn(); } catch (error) { console.error(error); } } }
   track(command, label = "") {
-    const record = { requestId: command.requestId, userId: command.userId, action: command.action, label, status: "sent", clients: Object.create(null) };
+    const previous = this.records.get(this.latest.get(command.userId));
+    const record = { requestId: command.requestId, userId: command.userId, action: command.action,
+      label: command.action === "playSound" ? label : previous?.label ?? label,
+      sourceRequestId: previous?.requestId,
+      volume: command.action === "playSound" ? command.data?.volume : command.volume ?? previous?.volume,
+      status: "sent", clients: Object.create(null) };
     this.records.set(command.requestId, record);
     if (command.action !== "changeVolume" || !this.latest.has(command.userId)) this.latest.set(command.userId, command.requestId);
     while (this.records.size > 200) {
@@ -34,6 +39,11 @@ export class StatusTracker {
     clearTimeout(record.timer);
     const statuses = new Set(Object.values(record.clients).map(client => client.status));
     record.status = statuses.size > 1 ? "mixed" : packet.status;
+    // Volume commands must not replace the original play record or hide its eventual end.
+    const latest = this.records.get(this.latest.get(record.userId));
+    if (record.action === "changeVolume" && latest && latest.requestId === record.sourceRequestId && packet.status === "volumeChanged") {
+      latest.volume = record.volume;
+    }
     this.changed(); return true;
   }
   disconnected(userId) {

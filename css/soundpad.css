@@ -1,39 +1,70 @@
-.chris-sound-module .window-content { overflow: auto; }
-.chris-sound-soundpad { display: flex; flex-direction: column; gap: 0.65rem; padding: 0.4rem; min-width: 0; }
-.chris-sound-soundpad fieldset { border: 1px solid var(--color-border-light-2, #777); border-radius: 0.4rem; padding: 0.6rem; display: flex; flex-direction: column; gap: 0.5rem; }
-.chris-sound-soundpad legend { padding: 0 0.4rem; font-weight: bold; }
-.chris-sound-soundpad .csm-row { display: flex; flex-wrap: wrap; align-items: end; gap: 0.4rem; }
-.chris-sound-soundpad .csm-row > label, .chris-sound-soundpad .csm-row > button { flex: 1 1 120px; min-width: 0; }
-.chris-sound-soundpad label { display: flex; flex-direction: column; gap: 0.2rem; }
-.chris-sound-soundpad .csm-check { flex-direction: row; align-items: center; }
-.chris-sound-soundpad .soundpad-drop-area { border: 2px dashed var(--color-border-light-2, #777); border-radius: 0.4rem; padding: 0.8rem; text-align: center; }
-.chris-sound-soundpad .sound-list { max-height: 230px; min-height: 60px; overflow: auto; display: flex; flex-direction: column; gap: 0.3rem; }
-.chris-sound-soundpad .sound-row { display: flex; gap: 0.2rem; align-items: center; }
-.chris-sound-soundpad [hidden] { display: none !important; }
-.chris-sound-soundpad .sound-row > button { width: 2rem; flex: 0 0 auto; padding: 0.2rem; }
-.chris-sound-soundpad .sound-row .sound-button { flex: 1; min-width: 0; width: auto; text-align: left; white-space: normal; overflow-wrap: anywhere; padding: 0.4rem; }
-.chris-sound-soundpad .sound-button small { display: block; font-weight: normal; opacity: 0.75; }
-.chris-sound-soundpad .sound-button.active { outline: 2px solid var(--color-border-highlight, #a86); outline-offset: -2px; }
-.chris-sound-soundpad .recipient-list { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; }
-.chris-sound-soundpad .recipient-status { display: flex; flex-direction: column; gap: 0.25rem; overflow-wrap: anywhere; }
-.chris-sound-soundpad .csm-hint { font-size: 0.85em; opacity: 0.8; margin: 0; }
-.chris-sound-soundpad .csm-panic { border: 2px solid var(--color-level-error, #c44); font-weight: bold; min-height: 2.4rem; }
-.chris-sound-soundpad button:focus-visible, .chris-sound-soundpad input:focus-visible, .chris-sound-soundpad select:focus-visible { outline: 2px solid var(--color-border-highlight, #a86); outline-offset: 1px; }
-
-/* Visible sidebar entry point, also used in a popped-out Playlist directory. */
-.chris-sound-module-launcher {
-  display: flex;
-  flex: 0 0 auto;
-  box-sizing: border-box;
-  width: 100%;
-  padding: 0.5rem;
+/* All rules are scoped. No canvas/tool styling is changed. */
+.chris-sound-module .window-content { padding: 12px; overflow: hidden; }
+.chris-sound-module .chris-sound-soundpad {
+  display: flex; flex-direction: column; gap: 10px; height: 100%; min-height: 0;
+  container-type: inline-size; color: var(--color-text-primary, inherit);
+  --csm-border: var(--color-border-light-primary, #747474);
+  --csm-panel: var(--background, var(--color-cool-5, #252830));
 }
-.chris-sound-module-launcher .chris-sound-module-open {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  min-height: 2.25rem;
-  white-space: normal;
+.chris-sound-module [hidden] { display: none !important; }
+.chris-sound-module :is(label, button, input, select, details, summary) { min-width: 0; }
+.chris-sound-module label { display: flex; flex-direction: column; gap: 3px; }
+.chris-sound-module input:is([type="text"], [type="search"], [type="number"]), .chris-sound-module select { width: 100%; }
+.chris-sound-module button { white-space: normal; line-height: 1.25; min-height: 30px; margin: 0; }
+.chris-sound-module :is(button, summary, input, select):focus-visible { outline: 2px solid var(--color-border-highlight, #f0a34a); outline-offset: 2px; }
+.chris-sound-module .csm-row { display: flex; align-items: end; gap: 8px; }
+.chris-sound-module .csm-row > * { flex: 1; }
+.chris-sound-module .csm-grow { flex: 2; }
+.chris-sound-module .csm-check { flex-direction: row; align-items: center; gap: 5px; }
+.chris-sound-module .csm-check input { flex: 0 0 auto; }
+.chris-sound-module .csm-toolbar { flex: 0 0 auto; position: relative; z-index: 5; }
+.chris-sound-module .csm-toolbar > .csm-row { align-items: center; }
+.chris-sound-module .csm-menu { flex: 0 0 auto; position: relative; }
+.chris-sound-module summary { cursor: pointer; padding: 6px; overflow-wrap: anywhere; }
+.chris-sound-module .csm-menu-body, .chris-sound-module .csm-target-body {
+  position: absolute; z-index: 20; padding: 12px; border: 1px solid var(--csm-border); border-radius: 5px;
+  background: var(--csm-panel); box-shadow: 0 5px 18px #0006; display: flex; flex-direction: column; gap: 8px;
 }
+.chris-sound-module .csm-menu-body { right: 0; width: 260px; }
+.chris-sound-module .csm-target-body { left: 0; right: 0; max-height: 360px; overflow-y: auto; }
+.chris-sound-module .recipient-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 6px; }
+.chris-sound-module .csm-target-picker small { opacity: .8; }
+.chris-sound-module .csm-filters { flex: 0 0 auto; }
+.chris-sound-module .csm-workspace { flex: 1 1 0; min-height: 100px; position: relative; }
+.chris-sound-module .sound-list { height: 100%; overflow: auto; padding: 4px; border: 1px solid var(--csm-border); border-radius: 5px; }
+.chris-sound-module .sound-row { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; padding: 3px 0; }
+.chris-sound-module .sound-button { flex: 1; text-align: left; padding: 7px 10px; overflow-wrap: anywhere; }
+.chris-sound-module .sound-button small { display: block; opacity: .75; font-size: .85em; font-weight: normal; }
+.chris-sound-module .sound-button.active { outline: 2px solid var(--color-border-highlight, #d89544); outline-offset: -2px; }
+.chris-sound-module .csm-icon { flex: 0 0 30px; width: 30px; }
+.chris-sound-module .csm-row-menu { flex: 0 0 auto; }
+.chris-sound-module .csm-entry-actions { display: flex; gap: 5px; }
+.chris-sound-module .sound-row:has(.csm-row-menu[open]) .csm-row-menu { flex-basis: 100%; }
+.chris-sound-module .csm-empty { padding: 30px 10px; text-align: center; }
+.chris-sound-module .csm-editor { position: absolute; z-index: 4; inset: 0 0 0 auto; width: min(330px, 100%); overflow: auto; padding: 12px; background: var(--csm-panel); border: 1px solid var(--csm-border); box-shadow: -4px 0 12px #0004; }
+.chris-sound-module .csm-editor > * { margin-top: 0; margin-bottom: 10px; }
+.chris-sound-module .csm-editor h3 { font-size: 1em; overflow-wrap: anywhere; }
+.chris-sound-module .csm-editing .sound-list { margin-right: 340px; }
+.chris-sound-module .csm-transport { flex: 0 0 auto; border-top: 1px solid var(--csm-border); padding-top: 9px; display: flex; flex-direction: column; gap: 8px; }
+.chris-sound-module .csm-next, .chris-sound-module .csm-live { padding: 8px; border: 1px solid var(--csm-border); border-radius: 5px; }
+.chris-sound-module .csm-next .csm-row { margin: 6px 0; }
+.chris-sound-module .csm-kicker { font-size: .8em; text-transform: uppercase; letter-spacing: .06em; margin-right: 6px; }
+.chris-sound-module .csm-primary { font-weight: bold; }
+.chris-sound-module .csm-hint { font-size: .83em; opacity: .85; margin: 3px 0 0; }
+.chris-sound-module .csm-live-targets { font-size: .9em; margin: 3px 0; overflow-wrap: anywhere; }
+.chris-sound-module .csm-live-reports { max-height: 64px; overflow: auto; font-size: .88em; border-left: 2px solid var(--csm-border); padding-left: 7px; }
+.chris-sound-module .csm-live-controls { margin-top: 6px; align-items: center; }
+.chris-sound-module .csm-bottom-row { display: flex; gap: 8px; align-items: start; }
+.chris-sound-module .csm-status-details { flex: 1; min-width: 0; }
+.chris-sound-module .recipient-status { max-height: 90px; overflow: auto; font-size: .9em; }
+.chris-sound-module .csm-panic { flex: 0 0 190px; border: 2px solid var(--color-level-error, #b94646); font-weight: bold; }
+.chris-sound-module .csm-status-warnings, .chris-sound-module .csm-unsaved { border-left: 3px solid var(--color-level-warning, #ce902f); padding-left: 7px; font-size: .85em; }
+@container (max-width: 620px) {
+  .chris-sound-module .csm-editing .sound-list { margin-right: 0; }
+  .chris-sound-module .csm-editor { width: 100%; }
+  .chris-sound-module .csm-filters { flex-wrap: wrap; }
+  .chris-sound-module .csm-panic { flex-basis: 145px; }
+}
+/* Existing right-sidebar launcher retained. */
+.chris-sound-module-launcher { padding: 8px; flex: 0 0 auto; }
+.chris-sound-module-open { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }

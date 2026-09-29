@@ -1,6 +1,5 @@
 {
   "name": "chris-sound-module",
-  "version": "2.0.0-rc.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,5 +8,6 @@
   },
   "engines": {
     "node": ">=22"
-  }
+  },
+  "version": "2.0.0-rc.4"
 }

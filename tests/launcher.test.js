@@ -50,13 +50,13 @@ test("adds a labelled native button before existing playlist controls", () => {
   assert.equal(root.firstElementChild.className, "chris-sound-module-launcher");
   assert.equal(root.children[1], core);
   assert.equal(button.type, "button"); assert.equal(button.disabled, false);
-  assert.equal(button.querySelector("span").textContent, "Open SoundPad");
-  assert.equal(button.attributes["aria-label"], "Open SoundPad");
+  assert.equal(button.querySelector("span").textContent, "Open Chris SoundPad");
+  assert.equal(button.attributes["aria-label"], "Open Chris SoundPad");
   assert.equal(button.querySelector("i").attributes["aria-hidden"], "true");
 });
 test("German labels are text, not injected HTML", () => {
   game.i18n.localize = localize(de);
-  const { button } = setup(); assert.equal(button.querySelector("span").textContent, "SoundPad öffnen");
+  const { button } = setup(); assert.equal(button.querySelector("span").textContent, "Chris SoundPad öffnen");
   game.i18n.localize = () => "<img src=x>";
   const other = setup().button; assert.equal(other.querySelector("span").textContent, "<img src=x>");
   assert.equal(other.querySelector("img"), null);
@@ -121,7 +121,7 @@ test("missing UI elements are harmless", () => {
 });
 test("registers the v14 hook once per Hooks object", () => {
   registerSoundPadLauncher(); registerSoundPadLauncher();
-  assert.equal(hooks.length, 1); assert.equal(hooks[0].name, "renderPlaylistDirectory");
+  assert.equal(hooks.length, 3); assert.equal(hooks[0].name, "renderPlaylistDirectory");
   assert.equal(hooks[0].handler, renderPlaylistLauncher);
 });
 test("reopening an existing pad preserves unsaved values and avoids rendering", async () => {
